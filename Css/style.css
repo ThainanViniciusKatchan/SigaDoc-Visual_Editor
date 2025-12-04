@@ -94,3 +94,37 @@ body {
 .cm-keyword {
     color: #c586c0;
 }
+
+.code-preview {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+}
+
+.cm-tag {
+    color: #569cd6;
+    /* Azul para macros [@...] */
+}
+
+.cm-keyword {
+    color: #c586c0;
+    /* Roxo para lógica [#if], [#else] */
+    font-weight: bold;
+}
+
+.cm-attr {
+    color: #9cdcfe;
+}
+
+.cm-string {
+    color: #ce9178;
+}
+
+/* Estilo para itens selecionados no canvas */
+.canvas-item.selected {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+    z-index: 10;
+}

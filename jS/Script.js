@@ -2,6 +2,39 @@ lucide.createIcons();
 
 // CONFIGURAÇÃO DOS COMPONENTES
 const componentConfig = {
+    condicional: {
+        label: 'Condição (If/Else)',
+        icon: 'git-branch', // Ícone de ramificação
+        isContainer: true,  // Permite arrastar itens para dentro
+        defaultProps: { titulo: 'Bloco Lógico', tipo: 'if', expressao: 'variavel == "valor"' },
+        renderPreview: (props) => {
+            let colorClass = props.tipo === 'else' ? 'text-orange-600' : 'text-blue-600';
+            let labelTipo = props.tipo.toUpperCase();
+            let desc = props.tipo === 'else' ? '(Senão)' : `(${props.expressao})`;
+            return `
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-xs font-bold px-2 py-1 rounded bg-gray-200 ${colorClass}">${labelTipo}</span>
+                    <span class="text-sm font-medium text-gray-700 truncate">${desc}</span>
+                </div>
+                <div class="text-[10px] text-gray-400">Arraste o conteúdo para dentro</div>
+            `;
+        },
+        generateFM: (props, childrenCode) => {
+            // Lógica de Geração do FreeMarker
+            const expr = props.expressao ? ` ${props.expressao}` : '';
+
+            if (props.tipo === 'if') {
+                // Se for IF, abre e fecha o bloco
+                return `[#if${expr}]\n${childrenCode}\n\t[/#if]`;
+            } else if (props.tipo === 'elseif') {
+                // Elseif apenas injeta a tag, o fechamento depende do IF pai
+                return `[#elseif${expr}]\n${childrenCode}`;
+            } else {
+                // Else não tem expressão e não fecha tag própria
+                return `[#else]\n${childrenCode}`;
+            }
+        }
+    },
     grupo: {
         label: 'Grupo',
         icon: 'box',
@@ -199,6 +232,8 @@ function updateComponentProps(id, newProps) {
         comp.props = { ...comp.props, ...newProps };
         renderCanvas(); // Atualiza visual (ex: título mudou)
         updateCode();   // Atualiza código gerado
+        if (newProps.tipo) renderProperties(id);
+        updateCode();
     }
 }
 
@@ -260,7 +295,16 @@ function renderComponentList(list, containerEl) {
         // Cria o elemento wrapper
         const itemEl = document.createElement('div');
         itemEl.id = 'comp-' + comp.id;
-        itemEl.className = `canvas-item p-4 rounded-md cursor-pointer group relative border border-gray-200 hover:border-blue-300 transition-all ${selectedId === comp.id ? 'selected' : ''}`;
+        let borderClass = 'border-gray-200 hover:border-blue-300';
+        let bgClass = 'bg-white';
+
+        if (comp.type === 'condicional') {
+            borderClass = 'border-orange-300 hover:border-orange-500 border-2';
+            bgClass = 'bg-orange-50';
+        } else if (config.isContainer) {
+            bgClass = 'bg-gray-50';
+        }
+        itemEl.className = `canvas-item p-4 rounded-md cursor-pointer group relative border transition-all ${borderClass} ${bgClass} ${selectedId === comp.id ? 'selected' : ''}`;
 
         // Evento de clique para seleção (Stop propagation para não selecionar o pai ao clicar no filho)
         itemEl.onclick = (e) => {
@@ -332,29 +376,48 @@ function renderProperties(id) {
 
     let html = `<div class="mb-4 pb-2 border-b border-gray-100 font-bold text-gray-700">${componentConfig[comp.type].label}</div>`;
 
-    // Renderiza inputs baseados nas props
+    // Input especial para o Tipo de Condição (Select)
+    if (comp.type === 'condicional') {
+        html += `
+            <div class="flex flex-col gap-1 mb-3">
+                <label class="text-xs font-bold text-gray-600 uppercase">Tipo de Condição</label>
+                <select name="tipo" class="border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="if" ${comp.props.tipo === 'if' ? 'selected' : ''}>IF (Se)</option>
+                    <option value="elseif" ${comp.props.tipo === 'elseif' ? 'selected' : ''}>ELSE IF (Senão Se)</option>
+                    <option value="else" ${comp.props.tipo === 'else' ? 'selected' : ''}>ELSE (Senão)</option>
+                </select>
+            </div>
+        `;
+    }
+
     Object.keys(comp.props).forEach(key => {
+        // Pula 'tipo' pois já criamos o select acima
+        if (key === 'tipo' && comp.type === 'condicional') return;
+
+        // Esconde o campo 'expressão' se for do tipo ELSE
+        if (key === 'expressao' && comp.props.tipo === 'else') return;
+
         let label = key.charAt(0).toUpperCase() + key.slice(1);
         let helpText = '';
 
-        // Customizações de labels
-        if (key === 'var') { label = 'Nome da Variável (var)'; helpText = 'Identificador único no sistema.'; }
-        if (key === 'depende') { label = 'Dependência Ajax (ID)'; helpText = 'ID do campo que dispara atualização deste grupo.'; }
+        if (key === 'var') { label = 'Nome da Variável (var)'; helpText = 'Identificador único.'; }
+        if (key === 'depende') { label = 'Dependência Ajax'; helpText = 'ID do campo Ajax.'; }
+        if (key === 'expressao') { label = 'Condição Lógica'; helpText = 'Ex: variavel == "valor"'; }
 
         html += `
-                    <div class="flex flex-col gap-1 mb-3">
-                        <label class="text-xs font-bold text-gray-600 uppercase">${label}</label>
-                        <input type="text" name="${key}" value="${comp.props[key]}" 
-                            class="border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
-                        ${helpText ? `<span class="text-[10px] text-gray-400">${helpText}</span>` : ''}
-                    </div>
-                `;
+            <div class="flex flex-col gap-1 mb-3">
+                <label class="text-xs font-bold text-gray-600 uppercase">${label}</label>
+                <input type="text" name="${key}" value="${comp.props[key]}" 
+                    class="border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                ${helpText ? `<span class="text-[10px] text-gray-400">${helpText}</span>` : ''}
+            </div>
+        `;
     });
 
     panel.innerHTML = html;
 
     // Listeners
-    panel.querySelectorAll('input').forEach(input => {
+    panel.querySelectorAll('input, select').forEach(input => {
         input.addEventListener('input', (e) => {
             updateComponentProps(id, { [e.target.name]: e.target.value });
         });
@@ -366,13 +429,10 @@ function renderProperties(id) {
 
 function updateCode() {
     let code = '[#-- Início da Entrevista --]\n[@entrevista]\n\n';
-
-    // Gera o código recursivamente
     code += generateListCode(components, 1);
-
     code += '\n[/@entrevista]\n';
 
-    // Bloco documento básico
+    // Bloco documento
     code += '\n[#-- Bloco do Documento --]\n[@documento]\n';
     code += '\t<p>Conteúdo do documento...</p>\n';
     code += generateDocPreview(components);
@@ -388,32 +448,31 @@ function generateListCode(list, indentLevel) {
     list.forEach(comp => {
         const config = componentConfig[comp.type];
 
-        if (comp.type === 'grupo') {
-            // Processa os filhos primeiro
+        if (config.isContainer) {
             const childrenCode = generateListCode(comp.children, indentLevel + 1);
-            // Passa o código dos filhos para a função do pai
-            const groupFM = config.generateFM(comp.props, childrenCode);
-
-            // Ajusta indentação visual do wrapper do grupo
-            fm += `${indent}${groupFM}\n`;
+            const blockFM = config.generateFM(comp.props, childrenCode);
+            fm += `${indent}${blockFM}\n`;
         } else {
-            // Item simples
             fm += `${indent}${colorizeMacro(config.generateFM(comp.props))}\n`;
         }
     });
-
     return fm;
 }
 
-// Gera apenas um preview simples das variáveis no bloco documento (flat)
 function generateDocPreview(list) {
     let docHtml = '';
     function traverse(items) {
         items.forEach(c => {
-            if (c.type !== 'grupo') {
+            // Se for condicional, mostramos a lógica no preview do documento também
+            if (c.type === 'condicional') {
+                docHtml += `[#${c.props.tipo} ${c.props.tipo !== 'else' ? c.props.expressao : ''}]\n`;
+                if (c.children) traverse(c.children);
+                if (c.props.tipo === 'if') docHtml += `[/#if]\n`;
+            } else if (c.type !== 'grupo') {
                 docHtml += `\t<p><b>${c.props.titulo}:</b> \${${c.props.var}!}</p>\n`;
+            } else {
+                if (c.children) traverse(c.children);
             }
-            if (c.children) traverse(c.children);
         });
     }
     traverse(list);
@@ -421,11 +480,12 @@ function generateDocPreview(list) {
 }
 
 function colorizeMacro(text) {
-    // Syntax highlight simples
-    return text.replace(/(\[@\w+)/g, '<span >$1</span>')
-        .replace(/(\[\/@\w+\])/g, '<span >$1</span>')
-        .replace(/(\s\w+=)/g, '<span >$1</span>')
-        .replace(/(".*?")/g, '<span >$1</span>');
+    return text.replace(/(\[@\w+)/g, '<span>$1</span>')
+        .replace(/(\[\/@\w+\])/g, '<span>$1</span>')
+        .replace(/(\[\#\w+)/g, '<span>$1</span>') // Cor para lógica [#if]
+        .replace(/(\[\/\#\w+\])/g, '<span>$1</span>')
+        .replace(/(\s\w+=)/g, '<span>$1</span>')
+        .replace(/(".*?")/g, '<span>$1</span>');
 }
 
 // 8. UTILITÁRIOS
