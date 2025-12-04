@@ -1,117 +1,170 @@
-// Inicializa ícones
 lucide.createIcons();
 
-// Estado da Aplicação
-let components = []; // Array de objetos {id, type, props}
-let selectedId = null;
-
-// Configuração dos Tipos de Componentes (Mapeamento para FreeMarker)
+// ==========================================
+// 1. CONFIGURAÇÃO DOS COMPONENTES
+// ==========================================
 const componentConfig = {
+    grupo: {
+        label: 'Grupo',
+        icon: 'box',
+        // "children" será o array que conterá os itens aninhados
+        isContainer: true,
+        defaultProps: { titulo: 'Título do Grupo', depende: '' },
+        renderPreview: (props) => `<div class="font-bold text-gray-700 mb-2">${props.titulo}</div><div class="text-xs text-gray-400">${props.depende ? 'Depende de: ' + props.depende : ''}</div>`,
+        // O generateFM recebe "childrenCode" que é o código já processado dos filhos
+        generateFM: (props, childrenCode) => {
+            let attr = `titulo="${props.titulo}"`;
+            if (props.depende) attr += ` depende="${props.depende}"`;
+            return `[@grupo ${attr}]\n${childrenCode}\t[/@grupo]`;
+        }
+    },
     texto: {
         label: 'Texto Curto',
         icon: 'type',
-        defaultProps: { titulo: 'Título do Campo', var: 'variavel_texto', largura: '', maxcaracteres: '' },
-        renderPreview: (props) => `<div class="flex flex-col gap-1"><label class="text-sm font-bold text-gray-700">${props.titulo}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.var}}"></div>`,
+        defaultProps: { titulo: 'Campo Texto', var: 'txt_var', largura: '', maxcaracteres: '' },
+        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.var}}">`,
         generateFM: (props) => `[@texto titulo="${props.titulo}" var="${props.var}" largura="${props.largura}" maxcaracteres="${props.maxcaracteres}" /]`
     },
     memo: {
         label: 'Texto Longo',
         icon: 'align-left',
-        defaultProps: { titulo: 'Observações', var: 'variavel_memo', linhas: '3', colunas: '60' },
-        renderPreview: (props) => `<div class="flex flex-col gap-1"><label class="text-sm font-bold text-gray-700">${props.titulo}:</label><textarea disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 h-20"></textarea></div>`,
+        defaultProps: { titulo: 'Observações', var: 'memo_var', linhas: '3', colunas: '60' },
+        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><textarea disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 h-16"></textarea>`,
         generateFM: (props) => `[@memo titulo="${props.titulo}" var="${props.var}" linhas="${props.linhas}" colunas="${props.colunas}" /]`
     },
     data: {
         label: 'Data',
         icon: 'calendar',
-        defaultProps: { titulo: 'Data do Evento', var: 'dt_evento' },
-        renderPreview: (props) => `<div class="flex flex-col gap-1"><label class="text-sm font-bold text-gray-700">${props.titulo}:</label><div class="relative"><input type="text" disabled class="w-32 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="dd/mm/aaaa"><i data-lucide="calendar" class="absolute right-2 top-1.5 w-4 h-4 text-gray-400"></i></div></div>`,
+        defaultProps: { titulo: 'Data', var: 'dt_var' },
+        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="relative"><input type="text" disabled class="w-32 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="__/__/____"><i data-lucide="calendar" class="absolute right-2 top-1.5 w-4 h-4 text-gray-400"></i></div>`,
         generateFM: (props) => `[@data titulo="${props.titulo}" var="${props.var}" /]`
     },
     selecao: {
         label: 'Seleção',
         icon: 'list',
-        defaultProps: { titulo: 'Escolha uma opção', var: 'variavel_sel', opcoes: 'Opção A;Opção B;Opção C' },
-        renderPreview: (props) => `<div class="flex flex-col gap-1"><label class="text-sm font-bold text-gray-700">${props.titulo}:</label><select disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50"><option>Selecione...</option></select></div>`,
+        defaultProps: { titulo: 'Selecione', var: 'sel_var', opcoes: 'A;B;C' },
+        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><select disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50"><option>Selecione...</option></select>`,
         generateFM: (props) => `[@selecao titulo="${props.titulo}" var="${props.var}" opcoes="${props.opcoes}" /]`
     },
     checkbox: {
         label: 'Checkbox',
         icon: 'check-square',
-        defaultProps: { titulo: 'Confirmo os dados', var: 'chk_confirma' },
-        renderPreview: (props) => `<div class="flex items-center gap-2 mt-4"><input type="checkbox" disabled><label class="text-sm font-bold text-gray-700">${props.titulo}</label></div>`,
+        defaultProps: { titulo: 'Confirmação', var: 'chk_var' },
+        renderPreview: (props) => `<div class="flex items-center gap-2 mt-2"><input type="checkbox" disabled><label class="text-sm font-bold text-gray-700">${props.titulo}</label></div>`,
         generateFM: (props) => `[@checkbox titulo="${props.titulo}" var="${props.var}" /]`
     },
     pessoa: {
         label: 'Pessoa',
         icon: 'user',
         defaultProps: { titulo: 'Servidor', var: 'p_servidor' },
-        renderPreview: (props) => `<div class="flex flex-col gap-1"><label class="text-sm font-bold text-gray-700">${props.titulo}:</label><div class="flex gap-1"><input type="text" disabled class="flex-1 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="Matrícula/Nome"><button disabled class="px-2 bg-gray-200 rounded">...</button></div></div>`,
+        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="flex gap-1"><input type="text" disabled class="flex-1 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="Matrícula/Nome"><button disabled class="px-2 bg-gray-200 rounded">...</button></div>`,
         generateFM: (props) => `[@pessoa titulo="${props.titulo}" var="${props.var}" /]`
     },
     lotacao: {
         label: 'Lotação',
         icon: 'building',
         defaultProps: { titulo: 'Unidade', var: 'l_unidade' },
-        renderPreview: (props) => `<div class="flex flex-col gap-1"><label class="text-sm font-bold text-gray-700">${props.titulo}:</label><div class="flex gap-1"><input type="text" disabled class="flex-1 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="Sigla/Nome"><button disabled class="px-2 bg-gray-200 rounded">...</button></div></div>`,
+        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="flex gap-1"><input type="text" disabled class="flex-1 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="Sigla/Nome"><button disabled class="px-2 bg-gray-200 rounded">...</button></div>`,
         generateFM: (props) => `[@lotacao titulo="${props.titulo}" var="${props.var}" /]`
     }
 };
 
-// Referências DOM
-const canvasEl = document.getElementById('canvas');
-const canvasContentEl = document.getElementById('canvas-content');
-const emptyStateEl = document.getElementById('empty-state');
-const codeOutputEl = document.getElementById('code-output');
-const propertiesPanelEl = document.getElementById('properties-panel');
+// ==========================================
+// 2. ESTADO (ÁRVORE DE COMPONENTES)
+// ==========================================
+// Agora 'components' suporta aninhamento. 
+// Ex: [{id:1, type:'grupo', children: [{id:2, type:'texto'}]}]
+let components = [];
+let selectedId = null;
 
-// Lógica de Drag and Drop
+// ==========================================
+// 3. LÓGICA DE DRAG AND DROP
+// ==========================================
+
+// Configura os itens da paleta
 document.querySelectorAll('.draggable-source').forEach(el => {
     el.addEventListener('dragstart', (e) => {
         e.dataTransfer.setData('type', el.dataset.type);
         e.dataTransfer.effectAllowed = 'copy';
+        e.stopPropagation();
     });
 });
 
-canvasEl.addEventListener('dragover', (e) => {
+// Funções globais para eventos HTML (ondrop, ondragover)
+window.handleDragOver = function (e) {
     e.preventDefault();
-    canvasEl.classList.add('drag-over');
-});
+    e.stopPropagation();
+    // Adiciona classe visual apenas ao alvo direto
+    e.currentTarget.classList.add('drag-over');
+}
 
-canvasEl.addEventListener('dragleave', () => {
-    canvasEl.classList.remove('drag-over');
-});
-
-canvasEl.addEventListener('drop', (e) => {
+window.handleDragLeave = function (e) {
     e.preventDefault();
-    canvasEl.classList.remove('drag-over');
+    e.stopPropagation();
+    e.currentTarget.classList.remove('drag-over');
+}
+
+window.handleDrop = function (e, parentId) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.classList.remove('drag-over');
+
     const type = e.dataTransfer.getData('type');
     if (type) {
-        addComponent(type);
+        addComponent(type, parentId);
     }
-});
+}
 
-// Gerenciamento de Componentes
-function addComponent(type) {
-    const id = Date.now().toString();
+// ==========================================
+// 4. CRUD DE COMPONENTES
+// ==========================================
+
+function addComponent(type, parentId) {
+    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     const config = componentConfig[type];
 
-    // Clone profundo das propriedades padrão para evitar referência
+    // Clona propriedades padrão
     const props = JSON.parse(JSON.stringify(config.defaultProps));
 
-    // Gera nome de variável único se já existir
-    if (components.some(c => c.props.var === props.var)) {
+    // Garante unicidade da variável
+    if (props.var && checkVarExists(props.var, components)) {
         props.var = props.var + '_' + Math.floor(Math.random() * 100);
     }
 
-    components.push({ id, type, props });
+    const newComponent = { id, type, props, children: [] };
+
+    if (parentId) {
+        // Adiciona dentro de um grupo existente
+        const parent = findComponentById(components, parentId);
+        if (parent && parent.children) {
+            parent.children.push(newComponent);
+        }
+    } else {
+        // Adiciona na raiz
+        components.push(newComponent);
+    }
+
     renderCanvas();
     selectComponent(id);
     updateCode();
 }
 
 function deleteComponent(id) {
-    components = components.filter(c => c.id !== id);
+    // Função recursiva para remover
+    function removeRecursive(list, idToRemove) {
+        const index = list.findIndex(c => c.id === idToRemove);
+        if (index > -1) {
+            list.splice(index, 1);
+            return true;
+        }
+        for (let c of list) {
+            if (c.children && removeRecursive(c.children, idToRemove)) return true;
+        }
+        return false;
+    }
+
+    removeRecursive(components, id);
+
     if (selectedId === id) {
         selectedId = null;
         renderProperties(null);
@@ -121,150 +174,251 @@ function deleteComponent(id) {
 }
 
 function updateComponentProps(id, newProps) {
-    const comp = components.find(c => c.id === id);
+    const comp = findComponentById(components, id);
     if (comp) {
         comp.props = { ...comp.props, ...newProps };
-        renderCanvas();
-        updateCode();
+        renderCanvas(); // Atualiza visual (ex: título mudou)
+        updateCode();   // Atualiza código gerado
     }
+}
+
+// Helper Recursivo para achar componente
+function findComponentById(list, id) {
+    for (let c of list) {
+        if (c.id === id) return c;
+        if (c.children) {
+            const found = findComponentById(c.children, id);
+            if (found) return found;
+        }
+    }
+    return null;
+}
+
+function checkVarExists(varName, list) {
+    for (let c of list) {
+        if (c.props.var === varName) return true;
+        if (c.children && checkVarExists(varName, c.children)) return true;
+    }
+    return false;
 }
 
 function selectComponent(id) {
     selectedId = id;
-    renderCanvas(); // Para atualizar a borda de seleção
+    // Atualiza classes de seleção visualmente sem re-renderizar tudo se possível
+    document.querySelectorAll('.canvas-item').forEach(el => el.classList.remove('selected'));
+    const el = document.getElementById('comp-' + id);
+    if (el) el.classList.add('selected');
+
     renderProperties(id);
 }
 
-// Renderização
+// ==========================================
+// 5. RENDERIZAÇÃO (VISUAL)
+// ==========================================
+
 function renderCanvas() {
+    const rootEl = document.getElementById('canvas-root-container');
+    const emptyEl = document.getElementById('empty-state');
+
     if (components.length === 0) {
-        emptyStateEl.classList.remove('hidden');
-        canvasContentEl.classList.add('hidden');
+        emptyEl.classList.remove('hidden');
+        rootEl.innerHTML = '';
         return;
     }
+    emptyEl.classList.add('hidden');
 
-    emptyStateEl.classList.add('hidden');
-    canvasContentEl.classList.remove('hidden');
-    canvasContentEl.innerHTML = '';
+    // Limpa e reconstrói a árvore
+    rootEl.innerHTML = '';
+    renderComponentList(components, rootEl);
 
-    components.forEach(comp => {
+    lucide.createIcons();
+}
+
+// Função recursiva para desenhar os componentes
+function renderComponentList(list, containerEl) {
+    list.forEach(comp => {
         const config = componentConfig[comp.type];
-        const el = document.createElement('div');
-        el.className = `canvas-item p-4 rounded-md cursor-pointer group relative ${selectedId === comp.id ? 'selected' : 'hover:border-blue-300'}`;
-        el.onclick = () => selectComponent(comp.id);
 
-        // Botão de excluir
+        // Cria o elemento wrapper
+        const itemEl = document.createElement('div');
+        itemEl.id = 'comp-' + comp.id;
+        itemEl.className = `canvas-item p-4 rounded-md cursor-pointer group relative border border-gray-200 hover:border-blue-300 transition-all ${selectedId === comp.id ? 'selected' : ''}`;
+
+        // Evento de clique para seleção (Stop propagation para não selecionar o pai ao clicar no filho)
+        itemEl.onclick = (e) => {
+            e.stopPropagation();
+            selectComponent(comp.id);
+        };
+
+        // Cabeçalho do Item (ícone e label)
+        const headerEl = document.createElement('div');
+        headerEl.className = 'absolute top-2 left-2 px-1.5 py-0.5 bg-gray-100 text-gray-500 text-[10px] font-bold uppercase rounded tracking-wide pointer-events-none z-10';
+        headerEl.innerText = config.label;
+        itemEl.appendChild(headerEl);
+
+        // Botão de Excluir
         const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1';
-        deleteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>';
+        deleteBtn.className = 'absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 z-20';
+        deleteBtn.innerHTML = '<i data-lucide="trash-2" width="14" height="14"></i>';
         deleteBtn.onclick = (e) => {
             e.stopPropagation();
             deleteComponent(comp.id);
         };
+        itemEl.appendChild(deleteBtn);
 
-        // Tag do tipo
-        const typeTag = document.createElement('div');
-        typeTag.className = 'absolute top-2 left-2 px-1.5 py-0.5 bg-gray-100 text-gray-500 text-[10px] font-bold uppercase rounded tracking-wide pointer-events-none';
-        typeTag.innerText = config.label;
+        // Conteúdo Principal
+        const contentEl = document.createElement('div');
+        contentEl.className = 'mt-3 pointer-events-none';
+        contentEl.innerHTML = config.renderPreview(comp.props);
+        itemEl.appendChild(contentEl);
 
-        const content = document.createElement('div');
-        content.className = 'mt-2 pointer-events-none'; // Impede interação com inputs do preview
-        content.innerHTML = config.renderPreview(comp.props);
+        // SE FOR GRUPO (Container)
+        if (config.isContainer) {
+            itemEl.classList.add('bg-gray-50'); // Fundo diferente para grupos
 
-        el.appendChild(typeTag);
-        el.appendChild(deleteBtn);
-        el.appendChild(content);
-        canvasContentEl.appendChild(el);
+            const dropZoneEl = document.createElement('div');
+            dropZoneEl.className = 'drop-zone mt-4 border border-dashed border-gray-300 rounded bg-white p-4';
+            dropZoneEl.style.minHeight = '60px';
+
+            // Configura eventos de drop para este container específico
+            dropZoneEl.setAttribute('ondragover', 'handleDragOver(event)');
+            dropZoneEl.setAttribute('ondragleave', 'handleDragLeave(event)');
+            dropZoneEl.setAttribute('ondrop', `handleDrop(event, '${comp.id}')`);
+
+            // Renderiza os filhos recursivamente dentro desta zona
+            renderComponentList(comp.children, dropZoneEl);
+
+            // Se estiver vazio, mostra dica
+            if (comp.children.length === 0) {
+                dropZoneEl.innerHTML = '<div class="text-center text-xs text-gray-400 py-2 pointer-events-none">Arraste itens para dentro deste grupo</div>';
+            }
+
+            itemEl.appendChild(dropZoneEl);
+        }
+
+        containerEl.appendChild(itemEl);
     });
-
-    // Reinicializa ícones novos
-    lucide.createIcons();
 }
 
+// ==========================================
+// 6. PAINEL DE PROPRIEDADES
+// ==========================================
+
 function renderProperties(id) {
+    const panel = document.getElementById('properties-panel');
     if (!id) {
-        propertiesPanelEl.innerHTML = '<p class="text-sm text-gray-500 italic text-center mt-10">Selecione um componente no canvas para editar.</p>';
+        panel.innerHTML = '<p class="text-sm text-gray-500 italic text-center mt-10">Selecione um componente no canvas para editar.</p>';
         return;
     }
 
-    const comp = components.find(c => c.id === id);
+    const comp = findComponentById(components, id);
     if (!comp) return;
 
-    let html = '';
+    let html = `<div class="mb-4 pb-2 border-b border-gray-100 font-bold text-gray-700">${componentConfig[comp.type].label}</div>`;
 
-    // Campo Variável (Comum a todos)
-    html += createInput('var', 'Nome da Variável', comp.props.var, 'Identificador único (sem espaços)');
-
-    // Campos específicos
+    // Renderiza inputs baseados nas props
     Object.keys(comp.props).forEach(key => {
-        if (key !== 'var') {
-            html += createInput(key, capitalize(key), comp.props[key]);
-        }
+        let label = key.charAt(0).toUpperCase() + key.slice(1);
+        let helpText = '';
+
+        // Customizações de labels
+        if (key === 'var') { label = 'Nome da Variável (var)'; helpText = 'Identificador único no sistema.'; }
+        if (key === 'depende') { label = 'Dependência Ajax (ID)'; helpText = 'ID do campo que dispara atualização deste grupo.'; }
+
+        html += `
+                    <div class="flex flex-col gap-1 mb-3">
+                        <label class="text-xs font-bold text-gray-600 uppercase">${label}</label>
+                        <input type="text" name="${key}" value="${comp.props[key]}" 
+                            class="border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+                        ${helpText ? `<span class="text-[10px] text-gray-400">${helpText}</span>` : ''}
+                    </div>
+                `;
     });
 
-    propertiesPanelEl.innerHTML = html;
+    panel.innerHTML = html;
 
-    // Listeners para inputs
-    propertiesPanelEl.querySelectorAll('input').forEach(input => {
+    // Listeners
+    panel.querySelectorAll('input').forEach(input => {
         input.addEventListener('input', (e) => {
             updateComponentProps(id, { [e.target.name]: e.target.value });
         });
     });
 }
 
-function createInput(name, label, value, helpText = '') {
-    return `
-                <div class="flex flex-col gap-1">
-                    <label class="text-xs font-bold text-gray-600 uppercase">${label}</label>
-                    <input type="text" name="${name}" value="${value}" class="border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
-                    ${helpText ? `<span class="text-[10px] text-gray-400">${helpText}</span>` : ''}
-                </div>
-            `;
-}
+// ==========================================
+// 7. GERAÇÃO DE CÓDIGO FREEMARKER (RECURSIVA)
+// ==========================================
 
-// Geração de Código
 function updateCode() {
     let code = '[#-- Início da Entrevista --]\n[@entrevista]\n\n';
 
-    // Gera o grupo principal (simulando estrutura de documento Siga)
-    if (components.length > 0) {
-        code += '\t[@grupo]\n';
-        components.forEach(comp => {
-            const config = componentConfig[comp.type];
-            const macro = config.generateFM(comp.props);
-            // Colorização simples
-            code += `\t\t${colorizeMacro(macro)}\n`;
-        });
-        code += '\t[/@grupo]\n';
-    }
+    // Gera o código recursivamente
+    code += generateListCode(components, 1);
 
     code += '\n[/@entrevista]\n';
 
-    // Adiciona um bloco de documento básico
-    code += '\n[#-- Bloco do Documento (Visualização) --]\n[@documento]\n';
-    code += '\t<p>Conteúdo do documento aqui...</p>\n';
-    components.forEach(comp => {
-        code += `\t<p><b>${comp.props.titulo}:</b> \${${comp.props.var}!}</p>\n`;
-    });
+    // Bloco documento básico
+    code += '\n[#-- Bloco do Documento --]\n[@documento]\n';
+    code += '\t<p>Conteúdo do documento...</p>\n';
+    code += generateDocPreview(components);
     code += '[/@documento]';
 
-    codeOutputEl.innerHTML = code;
+    document.getElementById('code-output').innerHTML = code;
+}
+
+function generateListCode(list, indentLevel) {
+    let fm = '';
+    const indent = '\t'.repeat(indentLevel);
+
+    list.forEach(comp => {
+        const config = componentConfig[comp.type];
+
+        if (comp.type === 'grupo') {
+            // Processa os filhos primeiro
+            const childrenCode = generateListCode(comp.children, indentLevel + 1);
+            // Passa o código dos filhos para a função do pai
+            const groupFM = config.generateFM(comp.props, childrenCode);
+
+            // Ajusta indentação visual do wrapper do grupo
+            fm += `${indent}${groupFM}\n`;
+        } else {
+            // Item simples
+            fm += `${indent}${colorizeMacro(config.generateFM(comp.props))}\n`;
+        }
+    });
+
+    return fm;
+}
+
+// Gera apenas um preview simples das variáveis no bloco documento (flat)
+function generateDocPreview(list) {
+    let docHtml = '';
+    function traverse(items) {
+        items.forEach(c => {
+            if (c.type !== 'grupo') {
+                docHtml += `\t<p><b>${c.props.titulo}:</b> \${${c.props.var}!}</p>\n`;
+            }
+            if (c.children) traverse(c.children);
+        });
+    }
+    traverse(list);
+    return docHtml;
 }
 
 function colorizeMacro(text) {
-    // Simples colorização de syntax para exibição
+    // Syntax highlight simples
     return text.replace(/(\[@\w+)/g, '<span class="cm-tag">$1</span>')
+        .replace(/(\[\/@\w+\])/g, '<span class="cm-tag">$1</span>')
         .replace(/(\s\w+=)/g, '<span class="cm-attr">$1</span>')
         .replace(/(".*?")/g, '<span class="cm-string">$1</span>');
 }
 
-// Utilitários
-function capitalize(s) {
-    return s.charAt(0).toUpperCase() + s.slice(1);
-}
+// ==========================================
+// 8. UTILITÁRIOS
+// ==========================================
 
 function limparCanvas() {
-    if (confirm("Deseja limpar todo o documento?")) {
+    if (confirm("Limpar tudo?")) {
         components = [];
         selectedId = null;
         renderCanvas();
@@ -274,11 +428,10 @@ function limparCanvas() {
 }
 
 function copiarCodigo() {
-    const text = codeOutputEl.innerText;
-    navigator.clipboard.writeText(text).then(() => {
-        alert("Código FreeMarker copiado para a área de transferência!");
-    });
+    const text = document.getElementById('code-output').innerText;
+    navigator.clipboard.writeText(text).then(() => alert("Copiado!"));
 }
 
-// Inicialização
+// Inicializa
 updateCode();
+renderCanvas();
