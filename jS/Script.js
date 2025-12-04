@@ -58,26 +58,26 @@ const componentConfig = {
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="relative"><input type="text" disabled class="w-32 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="__/__/____"><i data-lucide="calendar" class="absolute right-2 top-1.5 w-4 h-4 text-gray-400"></i></div>`,
         generateFM: (props) => `[@data titulo="${props.titulo}" var="${props.var}" /]`
     },
-    hora: {
-        label: 'Hora',
+    horaMinuto: {
+        label: 'Hora Minuto',
         icon: 'clock',
-        defaultProps: { titulo: 'Hora', var: 'hr_var' },
+        defaultProps: { titulo: 'Hora Minuto', var: 'hr_var' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="relative"><input type="text" disabled class="w-32 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="__:__"><i data-lucide="clock" class="absolute right-2 top-1.5 w-4 h-4 text-gray-400"></i></div>`,
-        generateFM: (props) => `[@hora titulo="${props.titulo}" var="${props.var}" /]`
+        generateFM: (props) => `[@horaMinuto titulo="${props.titulo}" var="${props.var}" /]`
     },
     selecao: {
         label: 'Seleção',
         icon: 'list',
-        defaultProps: { titulo: 'Selecione', var: 'sel_var', opcoes: 'A;B;C' },
+        defaultProps: { titulo: 'Selecione', var: 'sel_var', opcoes: 'A;B;C', idAjax: 'Idêntificador do Ajax', reler: true },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><select disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50"><option>Selecione...</option></select>`,
-        generateFM: (props) => `[@selecao titulo="${props.titulo}" var="${props.var}" opcoes="${props.opcoes}" /]`
+        generateFM: (props) => `[@selecao titulo="${props.titulo}" var="${props.var}" opcoes="${props.opcoes}" idAjax="${props.idAjax}" reler="${props.reler}" /]`
     },
     checkbox: {
         label: 'Checkbox',
         icon: 'check-square',
-        defaultProps: { titulo: 'Confirmação', var: 'chk_var' },
+        defaultProps: { titulo: 'Confirmação', var: 'chk_var', reler: "" },
         renderPreview: (props) => `<div class="flex items-center gap-2 mt-2"><input type="checkbox" disabled><label class="text-sm font-bold text-gray-700">${props.titulo}</label></div>`,
-        generateFM: (props) => `[@checkbox titulo="${props.titulo}" var="${props.var}" /]`
+        generateFM: (props) => `[@checkbox titulo="${props.titulo}" var="${props.var}" reler="${props.reler}" /]`
     },
     pessoa: {
         label: 'Pesquisa de Pessoa',
