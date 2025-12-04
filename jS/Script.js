@@ -1,8 +1,6 @@
 lucide.createIcons();
 
-// ==========================================
-// 1. CONFIGURAÇÃO DOS COMPONENTES
-// ==========================================
+// CONFIGURAÇÃO DOS COMPONENTES
 const componentConfig = {
     grupo: {
         label: 'Grupo',
@@ -18,15 +16,36 @@ const componentConfig = {
             return `[@grupo ${attr}]\n${childrenCode}\t[/@grupo]`;
         }
     },
+    separador: {
+        label: 'Separador',
+        icon: 'minus',
+        defaultProps: {},
+        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700"><hr></label>`,
+        generateFM: (props) => `[@separador /]`
+    },
     texto: {
-        label: 'Texto Curto',
+        label: 'Campo Texto',
         icon: 'type',
         defaultProps: { titulo: 'Campo Texto', var: 'txt_var', largura: '', maxcaracteres: '' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.var}}">`,
         generateFM: (props) => `[@texto titulo="${props.titulo}" var="${props.var}" largura="${props.largura}" maxcaracteres="${props.maxcaracteres}" /]`
     },
+    numero: {
+        label: 'Campo Número',
+        icon: 'binary',
+        defaultProps: { titulo: 'Campo numero', var: 'number_var', largura: '', maxcaracteres: '' },
+        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.var}}">`,
+        generateFM: (props) => `[@numero titulo="${props.titulo}" var="${props.var}" largura="${props.largura}" maxcaracteres="${props.maxcaracteres}" /]`
+    },
+    editor: {
+        label: 'Campo Editor',
+        icon: 'text-initial',
+        defaultProps: { titulo: 'Editor', var: 'editor_var' },
+        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><textarea disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 h-16"></textarea>`,
+        generateFM: (props) => `[@editor titulo="${props.titulo}" var="${props.var}" /]`
+    },
     memo: {
-        label: 'Texto Longo',
+        label: 'Campo Texto Longo',
         icon: 'align-left',
         defaultProps: { titulo: 'Observações', var: 'memo_var', linhas: '3', colunas: '60' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><textarea disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 h-16"></textarea>`,
@@ -38,6 +57,13 @@ const componentConfig = {
         defaultProps: { titulo: 'Data', var: 'dt_var' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="relative"><input type="text" disabled class="w-32 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="__/__/____"><i data-lucide="calendar" class="absolute right-2 top-1.5 w-4 h-4 text-gray-400"></i></div>`,
         generateFM: (props) => `[@data titulo="${props.titulo}" var="${props.var}" /]`
+    },
+    hora: {
+        label: 'Hora',
+        icon: 'clock',
+        defaultProps: { titulo: 'Hora', var: 'hr_var' },
+        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="relative"><input type="text" disabled class="w-32 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="__:__"><i data-lucide="clock" class="absolute right-2 top-1.5 w-4 h-4 text-gray-400"></i></div>`,
+        generateFM: (props) => `[@hora titulo="${props.titulo}" var="${props.var}" /]`
     },
     selecao: {
         label: 'Seleção',
@@ -54,14 +80,14 @@ const componentConfig = {
         generateFM: (props) => `[@checkbox titulo="${props.titulo}" var="${props.var}" /]`
     },
     pessoa: {
-        label: 'Pessoa',
+        label: 'Pesquisa de Pessoa',
         icon: 'user',
         defaultProps: { titulo: 'Servidor', var: 'p_servidor' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="flex gap-1"><input type="text" disabled class="flex-1 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="Matrícula/Nome"><button disabled class="px-2 bg-gray-200 rounded">...</button></div>`,
         generateFM: (props) => `[@pessoa titulo="${props.titulo}" var="${props.var}" /]`
     },
     lotacao: {
-        label: 'Lotação',
+        label: 'Pesquisa de Lotação',
         icon: 'building',
         defaultProps: { titulo: 'Unidade', var: 'l_unidade' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="flex gap-1"><input type="text" disabled class="flex-1 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="Sigla/Nome"><button disabled class="px-2 bg-gray-200 rounded">...</button></div>`,
@@ -69,17 +95,13 @@ const componentConfig = {
     }
 };
 
-// ==========================================
 // 2. ESTADO (ÁRVORE DE COMPONENTES)
-// ==========================================
 // Agora 'components' suporta aninhamento. 
 // Ex: [{id:1, type:'grupo', children: [{id:2, type:'texto'}]}]
 let components = [];
 let selectedId = null;
 
-// ==========================================
 // 3. LÓGICA DE DRAG AND DROP
-// ==========================================
 
 // Configura os itens da paleta
 document.querySelectorAll('.draggable-source').forEach(el => {
@@ -115,9 +137,7 @@ window.handleDrop = function (e, parentId) {
     }
 }
 
-// ==========================================
 // 4. CRUD DE COMPONENTES
-// ==========================================
 
 function addComponent(type, parentId) {
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
@@ -212,9 +232,7 @@ function selectComponent(id) {
     renderProperties(id);
 }
 
-// ==========================================
 // 5. RENDERIZAÇÃO (VISUAL)
-// ==========================================
 
 function renderCanvas() {
     const rootEl = document.getElementById('canvas-root-container');
@@ -300,9 +318,7 @@ function renderComponentList(list, containerEl) {
     });
 }
 
-// ==========================================
 // 6. PAINEL DE PROPRIEDADES
-// ==========================================
 
 function renderProperties(id) {
     const panel = document.getElementById('properties-panel');
@@ -345,9 +361,8 @@ function renderProperties(id) {
     });
 }
 
-// ==========================================
+
 // 7. GERAÇÃO DE CÓDIGO FREEMARKER (RECURSIVA)
-// ==========================================
 
 function updateCode() {
     let code = '[#-- Início da Entrevista --]\n[@entrevista]\n\n';
@@ -407,15 +422,13 @@ function generateDocPreview(list) {
 
 function colorizeMacro(text) {
     // Syntax highlight simples
-    return text.replace(/(\[@\w+)/g, '<span class="cm-tag">$1</span>')
-        .replace(/(\[\/@\w+\])/g, '<span class="cm-tag">$1</span>')
-        .replace(/(\s\w+=)/g, '<span class="cm-attr">$1</span>')
-        .replace(/(".*?")/g, '<span class="cm-string">$1</span>');
+    return text.replace(/(\[@\w+)/g, '<span >$1</span>')
+        .replace(/(\[\/@\w+\])/g, '<span >$1</span>')
+        .replace(/(\s\w+=)/g, '<span >$1</span>')
+        .replace(/(".*?")/g, '<span >$1</span>');
 }
 
-// ==========================================
 // 8. UTILITÁRIOS
-// ==========================================
 
 function limparCanvas() {
     if (confirm("Limpar tudo?")) {

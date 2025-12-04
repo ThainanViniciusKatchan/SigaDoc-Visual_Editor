@@ -24,11 +24,11 @@
         <div class="flex gap-2">
             <button onclick="copiarCodigo()"
                 class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition-colors">
-                <i data-lucide="copy" size="16"></i> Copiar
+                <i data-lucide="copy" size="16"></i> Copiar Código
             </button>
             <button onclick="limparCanvas()"
                 class="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-md text-sm font-medium transition-colors">
-                <i data-lucide="trash-2" size="16"></i> Limpar
+                <i data-lucide="trash-2" size="16"></i> Limpar Editor
             </button>
         </div>
     </header>
@@ -48,6 +48,11 @@
                             <i data-lucide="box" class="text-yellow-600" size="18"></i>
                             <span class="text-sm font-medium text-gray-700">Grupo (Container)</span>
                         </div>
+                        <div class="draggable-source bg-yellow-50 border border-yellow-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-yellow-400 cursor-grab"
+                            draggable="true" data-type="separador">
+                            <i data-lucide="minus" class="text-yellow-600" size="18"></i>
+                            <span class="text-sm font-medium text-gray-700">Separador</span>
+                        </div>
                     </div>
                 </details>
             </div>
@@ -61,7 +66,17 @@
                         <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
                             draggable="true" data-type="texto">
                             <i data-lucide="type" class="text-gray-500" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Texto Curto</span>
+                            <span class="text-sm font-medium text-gray-700">Campo Texto</span>
+                        </div>
+                        <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
+                            draggable="true" data-type="numero">
+                            <i data-lucide="binary" class="binary-gray-500" size="18"></i>
+                            <span class="text-sm font-medium text-gray-700">Campo Número</span>
+                        </div>
+                        <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
+                            draggable="true" data-type="editor">
+                            <i data-lucide="text-initial" class="text-gray-500" size="18"></i>
+                            <span class="text-sm font-medium text-gray-700">Editor</span>
                         </div>
                         <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
                             draggable="true" data-type="memo">
@@ -72,6 +87,11 @@
                             draggable="true" data-type="data">
                             <i data-lucide="calendar" class="text-gray-500" size="18"></i>
                             <span class="text-sm font-medium text-gray-700">Data</span>
+                        </div>
+                        <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
+                            draggable="true" data-type="hora">
+                            <i data-lucide="clock" class="text-gray-500" size="18"></i>
+                            <span class="text-sm font-medium text-gray-700">Hora</span>
                         </div>
                         <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
                             draggable="true" data-type="selecao">
