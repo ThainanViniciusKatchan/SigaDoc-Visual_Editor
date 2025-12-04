@@ -1,0 +1,66 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f3f4f6;
+}
+
+/* Estilos para o Drag and Drop */
+.draggable-source {
+    cursor: grab;
+}
+
+.draggable-source:active {
+    cursor: grabbing;
+}
+
+.drop-zone {
+    min-height: 500px;
+    background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 20px 20px;
+    transition: background-color 0.2s;
+}
+
+.drop-zone.drag-over {
+    background-color: #e0e7ff;
+    border: 2px dashed #4f46e5;
+}
+
+.component-item {
+    transition: all 0.2s;
+}
+
+.component-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.canvas-item {
+    position: relative;
+    border: 1px solid #e5e7eb;
+    background: white;
+}
+
+.canvas-item.selected {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+/* Syntax Highlighting simulado para o FreeMarker */
+.code-preview {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+}
+
+.cm-tag {
+    color: #569cd6;
+}
+
+.cm-attr {
+    color: #9cdcfe;
+}
+
+.cm-string {
+    color: #ce9178;
+}
