@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SigaDoc - Editor Visual de Modelos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ícones para a interface -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
+        
+        /* Estilos para o Drag and Drop */
+        .draggable-source { cursor: grab; }
+        .draggable-source:active { cursor: grabbing; }
+        
+        .drop-zone {
+            min-height: 500px;
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+            transition: background-color 0.2s;
+        }
+        
+        .drop-zone.drag-over {
+            background-color: #e0e7ff;
+            border: 2px dashed #4f46e5;
+        }
+
+        .component-item {
+            transition: all 0.2s;
+        }
+        
+        .component-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .canvas-item {
+            position: relative;
+            border: 1px solid #e5e7eb;
+            background: white;
+        }
+        
+        .canvas-item.selected {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+
+        /* Syntax Highlighting simulado para o FreeMarker */
+        .code-preview {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .cm-tag { color: #569cd6; }
+        .cm-attr { color: #9cdcfe; }
+        .cm-string { color: #ce9178; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- Cabeçalho -->
+    <header class="bg-white border-b border-gray-200 h-16 flex items-center px-6 justify-between shadow-sm z-10">
+        <div class="flex items-center gap-2">
+            <div class="bg-blue-600 text-white p-1.5 rounded">
+                <i data-lucide="file-text"></i>
+            </div>
+            <h1 class="font-bold text-xl text-gray-800">SigaDoc <span class="text-blue-600 font-normal">Visual Editor</span></h1>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="copiarCodigo()" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition-colors">
+                <i data-lucide="copy" size="16"></i> Copiar Código
+            </button>
+            <button onclick="limparCanvas()" class="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-md text-sm font-medium transition-colors">
+                <i data-lucide="trash-2" size="16"></i> Limpar
+            </button>
+        </div>
+    </header>
+
+    <!-- Área Principal -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Paleta de Componentes (Esquerda) -->
+        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col overflow-y-auto">
+            <div class="p-4 border-b border-gray-100">
+                <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Componentes Básicos</h2>
+                <div class="space-y-2">
+                    <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400" draggable="true" data-type="texto">
+                        <i data-lucide="type" class="text-gray-500" size="18"></i>
+                        <span class="text-sm font-medium text-gray-700">Texto Curto</span>
+                    </div>
+                    <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400" draggable="true" data-type="memo">
+                        <i data-lucide="align-left" class="text-gray-500" size="18"></i>
+                        <span class="text-sm font-medium text-gray-700">Texto Longo (Memo)</span>
+                    </div>
+                    <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400" draggable="true" data-type="data">
+                        <i data-lucide="calendar" class="text-gray-500" size="18"></i>
+                        <span class="text-sm font-medium text-gray-700">Data</span>
+                    </div>
+                    <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400" draggable="true" data-type="selecao">
+                        <i data-lucide="list" class="text-gray-500" size="18"></i>
+                        <span class="text-sm font-medium text-gray-700">Seleção</span>
+                    </div>
+                    <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400" draggable="true" data-type="checkbox">
+                        <i data-lucide="check-square" class="text-gray-500" size="18"></i>
+                        <span class="text-sm font-medium text-gray-700">Checkbox</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4">
+                <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Macros de Negócio</h2>
+                <div class="space-y-2">
+                    <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-purple-400" draggable="true" data-type="pessoa">
+                        <i data-lucide="user" class="text-purple-500" size="18"></i>
+                        <span class="text-sm font-medium text-gray-700">Pessoa</span>
+                    </div>
+                    <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-purple-400" draggable="true" data-type="lotacao">
+                        <i data-lucide="building" class="text-purple-500" size="18"></i>
+                        <span class="text-sm font-medium text-gray-700">Lotação</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Canvas (Centro) -->
+        <section class="flex-1 bg-gray-50 flex flex-col relative overflow-hidden">
+            <div class="p-4 border-b border-gray-200 bg-white flex justify-between items-center">
+                <h2 class="font-medium text-gray-700 text-sm">Canvas de Entrevista</h2>
+                <span class="text-xs text-gray-400">Arraste componentes aqui</span>
+            </div>
+            
+            <div id="canvas" class="flex-1 p-8 overflow-y-auto drop-zone">
+                <div id="empty-state" class="h-full flex flex-col items-center justify-center text-gray-400 pointer-events-none">
+                    <i data-lucide="layout-template" size="48" class="mb-4 opacity-20"></i>
+                    <p>Arraste elementos da paleta para começar</p>
+                </div>
+                <div id="canvas-content" class="space-y-4 max-w-3xl mx-auto hidden"></div>
+            </div>
+        </section>
+
+        <!-- Painel de Propriedades e Código (Direita) -->
+        <aside class="w-80 bg-white border-l border-gray-200 flex flex-col overflow-hidden">
+            <!-- Propriedades -->
+            <div class="flex-1 flex flex-col overflow-y-auto border-b border-gray-200">
+                <div class="p-4 bg-gray-50 border-b border-gray-200 font-medium text-sm text-gray-700">
+                    Propriedades
+                </div>
+                <div id="properties-panel" class="p-4 space-y-4">
+                    <p class="text-sm text-gray-500 italic text-center mt-10">Selecione um componente no canvas para editar.</p>
+                </div>
+            </div>
+
+            <!-- Preview de Código -->
+            <div class="h-1/2 flex flex-col bg-gray-900 text-white">
+                <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
+                    <span class="text-xs font-mono font-bold text-gray-400">FreeMarker Output</span>
+                    <div class="flex gap-2">
+                        <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                        <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    </div>
+                </div>
+                <pre class="flex-1 p-4 overflow-auto code-preview scrollbar-thin" id="code-output"></pre>
+            </div>
+        </aside>
+
+    </main>
+
+    <script>
+        // Inicializa ícones
+        lucide.createIcons();
+
+        // Estado da Aplicação
+        let components = []; // Array de objetos {id, type, props}
+        let selectedId = null;
+
+        // Configuração dos Tipos de Componentes (Mapeamento para FreeMarker)
+        const componentConfig = {
+            texto: {
+                label: 'Texto Curto',
+                icon: 'type',
+                defaultProps: { titulo: 'Título do Campo', var: 'variavel_texto', largura: '', maxcaracteres: '' },
+                renderPreview: (props) => `<div class="flex flex-col gap-1"><label class="text-sm font-bold text-gray-700">${props.titulo}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.var}}"></div>`,
+                generateFM: (props) => `[@texto titulo="${props.titulo}" var="${props.var}" largura="${props.largura}" maxcaracteres="${props.maxcaracteres}" /]`
+            },
+            memo: {
+                label: 'Texto Longo',
+                icon: 'align-left',
+                defaultProps: { titulo: 'Observações', var: 'variavel_memo', linhas: '3', colunas: '60' },
+                renderPreview: (props) => `<div class="flex flex-col gap-1"><label class="text-sm font-bold text-gray-700">${props.titulo}:</label><textarea disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 h-20"></textarea></div>`,
+                generateFM: (props) => `[@memo titulo="${props.titulo}" var="${props.var}" linhas="${props.linhas}" colunas="${props.colunas}" /]`
+            },
+            data: {
+                label: 'Data',
+                icon: 'calendar',
+                defaultProps: { titulo: 'Data do Evento', var: 'dt_evento' },
+                renderPreview: (props) => `<div class="flex flex-col gap-1"><label class="text-sm font-bold text-gray-700">${props.titulo}:</label><div class="relative"><input type="text" disabled class="w-32 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="dd/mm/aaaa"><i data-lucide="calendar" class="absolute right-2 top-1.5 w-4 h-4 text-gray-400"></i></div></div>`,
+                generateFM: (props) => `[@data titulo="${props.titulo}" var="${props.var}" /]`
+            },
+            selecao: {
+                label: 'Seleção',
+                icon: 'list',
+                defaultProps: { titulo: 'Escolha uma opção', var: 'variavel_sel', opcoes: 'Opção A;Opção B;Opção C' },
+                renderPreview: (props) => `<div class="flex flex-col gap-1"><label class="text-sm font-bold text-gray-700">${props.titulo}:</label><select disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50"><option>Selecione...</option></select></div>`,
+                generateFM: (props) => `[@selecao titulo="${props.titulo}" var="${props.var}" opcoes="${props.opcoes}" /]`
+            },
+            checkbox: {
+                label: 'Checkbox',
+                icon: 'check-square',
+                defaultProps: { titulo: 'Confirmo os dados', var: 'chk_confirma' },
+                renderPreview: (props) => `<div class="flex items-center gap-2 mt-4"><input type="checkbox" disabled><label class="text-sm font-bold text-gray-700">${props.titulo}</label></div>`,
+                generateFM: (props) => `[@checkbox titulo="${props.titulo}" var="${props.var}" /]`
+            },
+            pessoa: {
+                label: 'Pessoa',
+                icon: 'user',
+                defaultProps: { titulo: 'Servidor', var: 'p_servidor' },
+                renderPreview: (props) => `<div class="flex flex-col gap-1"><label class="text-sm font-bold text-gray-700">${props.titulo}:</label><div class="flex gap-1"><input type="text" disabled class="flex-1 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="Matrícula/Nome"><button disabled class="px-2 bg-gray-200 rounded">...</button></div></div>`,
+                generateFM: (props) => `[@pessoa titulo="${props.titulo}" var="${props.var}" /]`
+            },
+            lotacao: {
+                label: 'Lotação',
+                icon: 'building',
+                defaultProps: { titulo: 'Unidade', var: 'l_unidade' },
+                renderPreview: (props) => `<div class="flex flex-col gap-1"><label class="text-sm font-bold text-gray-700">${props.titulo}:</label><div class="flex gap-1"><input type="text" disabled class="flex-1 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="Sigla/Nome"><button disabled class="px-2 bg-gray-200 rounded">...</button></div></div>`,
+                generateFM: (props) => `[@lotacao titulo="${props.titulo}" var="${props.var}" /]`
+            }
+        };
+
+        // Referências DOM
+        const canvasEl = document.getElementById('canvas');
+        const canvasContentEl = document.getElementById('canvas-content');
+        const emptyStateEl = document.getElementById('empty-state');
+        const codeOutputEl = document.getElementById('code-output');
+        const propertiesPanelEl = document.getElementById('properties-panel');
+
+        // Lógica de Drag and Drop
+        document.querySelectorAll('.draggable-source').forEach(el => {
+            el.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('type', el.dataset.type);
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+        });
+
+        canvasEl.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            canvasEl.classList.add('drag-over');
+        });
+
+        canvasEl.addEventListener('dragleave', () => {
+            canvasEl.classList.remove('drag-over');
+        });
+
+        canvasEl.addEventListener('drop', (e) => {
+            e.preventDefault();
+            canvasEl.classList.remove('drag-over');
+            const type = e.dataTransfer.getData('type');
+            if (type) {
+                addComponent(type);
+            }
+        });
+
+        // Gerenciamento de Componentes
+        function addComponent(type) {
+            const id = Date.now().toString();
+            const config = componentConfig[type];
+            
+            // Clone profundo das propriedades padrão para evitar referência
+            const props = JSON.parse(JSON.stringify(config.defaultProps));
+            
+            // Gera nome de variável único se já existir
+            if(components.some(c => c.props.var === props.var)) {
+                props.var = props.var + '_' + Math.floor(Math.random() * 100);
+            }
+
+            components.push({ id, type, props });
+            renderCanvas();
+            selectComponent(id);
+            updateCode();
+        }
+
+        function deleteComponent(id) {
+            components = components.filter(c => c.id !== id);
+            if (selectedId === id) {
+                selectedId = null;
+                renderProperties(null);
+            }
+            renderCanvas();
+            updateCode();
+        }
+
+        function updateComponentProps(id, newProps) {
+            const comp = components.find(c => c.id === id);
+            if (comp) {
+                comp.props = { ...comp.props, ...newProps };
+                renderCanvas();
+                updateCode();
+            }
+        }
+
+        function selectComponent(id) {
+            selectedId = id;
+            renderCanvas(); // Para atualizar a borda de seleção
+            renderProperties(id);
+        }
+
+        // Renderização
+        function renderCanvas() {
+            if (components.length === 0) {
+                emptyStateEl.classList.remove('hidden');
+                canvasContentEl.classList.add('hidden');
+                return;
+            }
+
+            emptyStateEl.classList.add('hidden');
+            canvasContentEl.classList.remove('hidden');
+            canvasContentEl.innerHTML = '';
+
+            components.forEach(comp => {
+                const config = componentConfig[comp.type];
+                const el = document.createElement('div');
+                el.className = `canvas-item p-4 rounded-md cursor-pointer group relative ${selectedId === comp.id ? 'selected' : 'hover:border-blue-300'}`;
+                el.onclick = () => selectComponent(comp.id);
+                
+                // Botão de excluir
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1';
+                deleteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteComponent(comp.id);
+                };
+
+                // Tag do tipo
+                const typeTag = document.createElement('div');
+                typeTag.className = 'absolute top-2 left-2 px-1.5 py-0.5 bg-gray-100 text-gray-500 text-[10px] font-bold uppercase rounded tracking-wide pointer-events-none';
+                typeTag.innerText = config.label;
+
+                const content = document.createElement('div');
+                content.className = 'mt-2 pointer-events-none'; // Impede interação com inputs do preview
+                content.innerHTML = config.renderPreview(comp.props);
+
+                el.appendChild(typeTag);
+                el.appendChild(deleteBtn);
+                el.appendChild(content);
+                canvasContentEl.appendChild(el);
+            });
+            
+            // Reinicializa ícones novos
+            lucide.createIcons();
+        }
+
+        function renderProperties(id) {
+            if (!id) {
+                propertiesPanelEl.innerHTML = '<p class="text-sm text-gray-500 italic text-center mt-10">Selecione um componente no canvas para editar.</p>';
+                return;
+            }
+
+            const comp = components.find(c => c.id === id);
+            if (!comp) return;
+
+            let html = '';
+            
+            // Campo Variável (Comum a todos)
+            html += createInput('var', 'Nome da Variável', comp.props.var, 'Identificador único (sem espaços)');
+
+            // Campos específicos
+            Object.keys(comp.props).forEach(key => {
+                if (key !== 'var') {
+                    html += createInput(key, capitalize(key), comp.props[key]);
+                }
+            });
+
+            propertiesPanelEl.innerHTML = html;
+
+            // Listeners para inputs
+            propertiesPanelEl.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    updateComponentProps(id, { [e.target.name]: e.target.value });
+                });
+            });
+        }
+
+        function createInput(name, label, value, helpText = '') {
+            return `
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-bold text-gray-600 uppercase">${label}</label>
+                    <input type="text" name="${name}" value="${value}" class="border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+                    ${helpText ? `<span class="text-[10px] text-gray-400">${helpText}</span>` : ''}
+                </div>
+            `;
+        }
+
+        // Geração de Código
+        function updateCode() {
+            let code = '[#-- Início da Entrevista --]\n[@entrevista]\n\n';
+            
+            // Gera o grupo principal (simulando estrutura de documento Siga)
+            if (components.length > 0) {
+                code += '\t[@grupo]\n';
+                components.forEach(comp => {
+                    const config = componentConfig[comp.type];
+                    const macro = config.generateFM(comp.props);
+                    // Colorização simples
+                    code += `\t\t${colorizeMacro(macro)}\n`;
+                });
+                code += '\t[/@grupo]\n';
+            }
+
+            code += '\n[/@entrevista]\n';
+            
+            // Adiciona um bloco de documento básico
+            code += '\n[#-- Bloco do Documento (Visualização) --]\n[@documento]\n';
+            code += '\t<p>Conteúdo do documento aqui...</p>\n';
+            components.forEach(comp => {
+                 code += `\t<p><b>${comp.props.titulo}:</b> \${${comp.props.var}!}</p>\n`;
+            });
+            code += '[/@documento]';
+
+            codeOutputEl.innerHTML = code;
+        }
+
+        function colorizeMacro(text) {
+            // Simples colorização de syntax para exibição
+            return text.replace(/(\[@\w+)/g, '<span class="cm-tag">$1</span>')
+                       .replace(/(\s\w+=)/g, '<span class="cm-attr">$1</span>')
+                       .replace(/(".*?")/g, '<span class="cm-string">$1</span>');
+        }
+
+        // Utilitários
+        function capitalize(s) {
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+
+        function limparCanvas() {
+            if(confirm("Deseja limpar todo o documento?")) {
+                components = [];
+                selectedId = null;
+                renderCanvas();
+                renderProperties(null);
+                updateCode();
+            }
+        }
+
+        function copiarCodigo() {
+            const text = codeOutputEl.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Código FreeMarker copiado para a área de transferência!");
+            });
+        }
+
+        // Inicialização
+        updateCode();
+
+    </script>
+</body>
+</html>
