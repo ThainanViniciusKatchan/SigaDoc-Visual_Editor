@@ -1,8 +1,16 @@
 {
     "version": 2,
-    "rewrites": [
+    "buildCommand": "echo 'No build needed'",
+    "outputDirectory": "dist",
+    "headers": [
         {
-            "destination": "index.html"
+            "source": "/assets/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=31536000, immutable"
+                }
+            ]
         }
     ]
 }
