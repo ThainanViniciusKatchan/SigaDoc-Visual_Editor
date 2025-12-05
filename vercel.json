@@ -5,11 +5,5 @@
             "source": "/(.*)",
             "destination": "/Index.html"
         }
-    ],
-    "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "/index.html"
-        }
     ]
 }
