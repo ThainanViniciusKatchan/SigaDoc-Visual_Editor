@@ -6,7 +6,7 @@ const componentConfig = {
         label: 'Condição (If/Else)',
         icon: 'git-branch', // Ícone de ramificação
         isContainer: true,  // Permite arrastar itens para dentro
-        defaultProps: { titulo: 'Bloco Lógico', tipo: 'if', expressao: 'variavel == "valor"' },
+        defaultProps: { tipo: 'if', expressao: 'variável == "valor"' },
         renderPreview: (props) => {
             let colorClass = props.tipo === 'else' ? 'text-orange-600' : 'text-blue-600';
             let labelTipo = props.tipo.toUpperCase();
@@ -34,6 +34,13 @@ const componentConfig = {
                 return `[#else]\n${childrenCode}`;
             }
         }
+    },
+    variavelFreeMarker: {
+        label: 'Variável FreeMarker',
+        icon: 'type',
+        defaultProps: { var: 'Nome', valor: 'Valor' },
+        renderPreview: (props) => `<div style="display: flex; flex-direction: row; gap: 5px; justify-content: center; align-items: center;"><label class="block text-sm font-bold text-gray-700">${props.var}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.var}}">${props.valor}:<input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.valor}}"></div>`,
+        generateFM: (props) => `[#assign ${props.var} = ${props.valor}]`
     },
     grupo: {
         label: 'Grupo',
@@ -720,6 +727,7 @@ function renderProperties(id) {
         if (key === 'var') { label = 'Nome da Variável (var)'; helpText = 'Identificador único.'; }
         if (key === 'depende') { label = 'Dependência Ajax'; helpText = 'ID do campo Ajax.'; }
         if (key === 'expressao') { label = 'Condição Lógica'; helpText = 'Ex: variavel == "valor"'; }
+        if (key === 'Valor') { label = 'Valor'; helpText = 'Valor da variável'; }
 
         html += `
             <div class="flex flex-col gap-1 mb-3">
