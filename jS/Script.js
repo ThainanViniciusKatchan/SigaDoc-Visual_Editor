@@ -129,10 +129,9 @@ const componentConfig = {
 };
 
 // 2. ESTADO (ÁRVORE DE COMPONENTES)
-// Agora 'components' suporta aninhamento. 
-// Ex: [{id:1, type:'grupo', children: [{id:2, type:'texto'}]}]
 let components = [];
 let selectedId = null;
+let draggedItemId = null; // Para reordenação
 
 // 3. LÓGICA DE DRAG AND DROP
 
@@ -140,6 +139,7 @@ let selectedId = null;
 document.querySelectorAll('.draggable-source').forEach(el => {
     el.addEventListener('dragstart', (e) => {
         e.dataTransfer.setData('type', el.dataset.type);
+        e.dataTransfer.setData('source', 'palette');
         e.dataTransfer.effectAllowed = 'copy';
         e.stopPropagation();
     });
@@ -165,8 +165,58 @@ window.handleDrop = function (e, parentId) {
     e.currentTarget.classList.remove('drag-over');
 
     const type = e.dataTransfer.getData('type');
-    if (type) {
+    const source = e.dataTransfer.getData('source');
+    const draggedId = e.dataTransfer.getData('itemId');
+
+    if (source === 'palette' && type) {
+        // Adicionar novo componente da paleta
         addComponent(type, parentId);
+    } else if (source === 'canvas' && draggedId) {
+        // Reordenar ou mover componente existente
+        moveComponent(draggedId, parentId, null);
+    }
+}
+
+// Nova função para lidar com drag sobre containers (grupos/condições)
+window.handleContainerDragOver = function (e, containerId) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const containerEl = document.getElementById('comp-' + containerId);
+    if (containerEl) {
+        containerEl.classList.add('container-drag-over');
+    }
+}
+
+window.handleContainerDragLeave = function (e, containerId) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const containerEl = document.getElementById('comp-' + containerId);
+    if (containerEl) {
+        containerEl.classList.remove('container-drag-over');
+    }
+}
+
+window.handleContainerDrop = function (e, containerId) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const containerEl = document.getElementById('comp-' + containerId);
+    if (containerEl) {
+        containerEl.classList.remove('container-drag-over');
+    }
+
+    const type = e.dataTransfer.getData('type');
+    const source = e.dataTransfer.getData('source');
+    const draggedId = e.dataTransfer.getData('itemId');
+
+    if (source === 'palette' && type) {
+        // Adicionar novo componente da paleta ao container
+        addComponent(type, containerId);
+    } else if (source === 'canvas' && draggedId) {
+        // Mover componente existente para o container
+        moveComponent(draggedId, containerId, null);
     }
 }
 
@@ -237,6 +287,123 @@ function updateComponentProps(id, newProps) {
     }
 }
 
+// Nova função para mover componente
+function moveComponent(componentId, targetParentId, targetIndex) {
+    // Encontra e remove o componente da posição atual
+    const component = findComponentById(components, componentId);
+    if (!component) return;
+
+    // Não permitir mover para dentro de si mesmo
+    if (componentId === targetParentId) return;
+
+    // Não permitir mover para dentro de seus próprios filhos
+    if (isDescendant(component, targetParentId)) return;
+
+    // Remove da posição atual
+    removeComponentById(components, componentId);
+
+    // Adiciona na nova posição
+    if (targetParentId) {
+        const targetParent = findComponentById(components, targetParentId);
+        if (targetParent && targetParent.children) {
+            if (targetIndex !== null) {
+                targetParent.children.splice(targetIndex, 0, component);
+            } else {
+                targetParent.children.push(component);
+            }
+        }
+    } else {
+        if (targetIndex !== null) {
+            components.splice(targetIndex, 0, component);
+        } else {
+            components.push(component);
+        }
+    }
+
+    renderCanvas();
+    updateCode();
+}
+
+// Nova função para reordenar componentes
+function reorderComponent(draggedId, targetId, position) {
+    const draggedComp = findComponentById(components, draggedId);
+    const targetComp = findComponentById(components, targetId);
+
+    if (!draggedComp || !targetComp) return;
+
+    // Encontra os pais de ambos
+    const draggedParentInfo = findParentById(components, draggedId);
+    const targetParentInfo = findParentById(components, targetId);
+
+    // Se não estão no mesmo nível, não permitir reordenação direta
+    if (draggedParentInfo.parentId !== targetParentInfo.parentId) {
+        // Mover para o mesmo nível do target
+        moveComponent(draggedId, targetParentInfo.parentId, null);
+        return;
+    }
+
+    // Estão no mesmo nível, reordenar
+    const parentList = draggedParentInfo.parentId ?
+        findComponentById(components, draggedParentInfo.parentId).children :
+        components;
+
+    // Remove da posição atual
+    const draggedIndex = parentList.findIndex(c => c.id === draggedId);
+    if (draggedIndex === -1) return;
+
+    parentList.splice(draggedIndex, 1);
+
+    // Encontra nova posição do target (após remoção)
+    const targetIndex = parentList.findIndex(c => c.id === targetId);
+    if (targetIndex === -1) return;
+
+    // Insere antes ou depois
+    const insertIndex = position === 'before' ? targetIndex : targetIndex + 1;
+    parentList.splice(insertIndex, 0, draggedComp);
+
+    renderCanvas();
+    updateCode();
+}
+
+// Helper para verificar se é descendente
+function isDescendant(parent, childId) {
+    if (!parent.children) return false;
+
+    for (let child of parent.children) {
+        if (child.id === childId) return true;
+        if (isDescendant(child, childId)) return true;
+    }
+    return false;
+}
+
+// Helper para encontrar o pai de um componente
+function findParentById(list, childId, parentId = null) {
+    for (let i = 0; i < list.length; i++) {
+        const c = list[i];
+        if (c.id === childId) {
+            return { parentId, index: i };
+        }
+        if (c.children) {
+            const found = findParentById(c.children, childId, c.id);
+            if (found.parentId !== undefined) return found;
+        }
+    }
+    return { parentId: undefined, index: -1 };
+}
+
+// Helper para remover componente sem retorná-lo
+function removeComponentById(list, id) {
+    const index = list.findIndex(c => c.id === id);
+    if (index > -1) {
+        list.splice(index, 1);
+        return true;
+    }
+    for (let c of list) {
+        if (c.children && removeComponentById(c.children, id)) return true;
+    }
+    return false;
+}
+
 // Helper Recursivo para achar componente
 function findComponentById(list, id) {
     for (let c of list) {
@@ -282,14 +449,14 @@ function renderCanvas() {
 
     // Limpa e reconstrói a árvore
     rootEl.innerHTML = '';
-    renderComponentList(components, rootEl);
+    renderComponentList(components, rootEl, null);
 
     lucide.createIcons();
 }
 
 // Função recursiva para desenhar os componentes
-function renderComponentList(list, containerEl) {
-    list.forEach(comp => {
+function renderComponentList(list, containerEl, parentId) {
+    list.forEach((comp, index) => {
         const config = componentConfig[comp.type];
 
         // Cria o elemento wrapper
@@ -304,7 +471,122 @@ function renderComponentList(list, containerEl) {
         } else if (config.isContainer) {
             bgClass = 'bg-gray-50';
         }
+
         itemEl.className = `canvas-item p-4 rounded-md cursor-pointer group relative border transition-all ${borderClass} ${bgClass} ${selectedId === comp.id ? 'selected' : ''}`;
+
+        // Tornar o item arrastável
+        itemEl.draggable = true;
+        itemEl.addEventListener('dragstart', (e) => {
+            e.stopPropagation();
+            draggedItemId = comp.id;
+            e.dataTransfer.setData('itemId', comp.id);
+            e.dataTransfer.setData('source', 'canvas');
+            e.dataTransfer.effectAllowed = 'move';
+            itemEl.classList.add('opacity-50');
+        });
+
+        itemEl.addEventListener('dragend', (e) => {
+            itemEl.classList.remove('opacity-50');
+            draggedItemId = null;
+        });
+
+        // Criar zonas de reordenação APENAS para elementos NÃO-CONTAINERS
+        // Containers (grupos/condições) não têm zonas de reordenação para não bloquear o drop
+        if (!config.isContainer) {
+            // Criar wrapper para as zonas de reordenação
+            const reorderWrapper = document.createElement('div');
+            reorderWrapper.style.position = 'absolute';
+            reorderWrapper.style.top = '0';
+            reorderWrapper.style.left = '0';
+            reorderWrapper.style.right = '0';
+            reorderWrapper.style.bottom = '0';
+            reorderWrapper.style.pointerEvents = 'none';
+            reorderWrapper.style.zIndex = '10';
+
+            // Área de drop para reordenação (ANTES - metade superior)
+            const dropBeforeEl = document.createElement('div');
+            dropBeforeEl.className = 'reorder-drop-zone reorder-drop-before';
+            dropBeforeEl.style.position = 'absolute';
+            dropBeforeEl.style.top = '0';
+            dropBeforeEl.style.left = '0';
+            dropBeforeEl.style.right = '0';
+            dropBeforeEl.style.height = '50%';
+            dropBeforeEl.style.pointerEvents = 'all';
+            dropBeforeEl.style.zIndex = '20';
+
+            dropBeforeEl.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const draggedId = e.dataTransfer.getData('itemId');
+                if (draggedId && draggedId !== comp.id) {
+                    // Remove classes de outros elementos
+                    document.querySelectorAll('.canvas-item').forEach(el => {
+                        el.classList.remove('reorder-before', 'reorder-after');
+                    });
+                    // Adiciona classe ao elemento atual
+                    itemEl.classList.add('reorder-before');
+                }
+            });
+
+            dropBeforeEl.addEventListener('dragleave', (e) => {
+                e.stopPropagation();
+                itemEl.classList.remove('reorder-before');
+            });
+
+            dropBeforeEl.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                itemEl.classList.remove('reorder-before');
+                const draggedId = e.dataTransfer.getData('itemId');
+                if (draggedId && draggedId !== comp.id) {
+                    reorderComponent(draggedId, comp.id, 'before');
+                }
+            });
+
+            // Área de drop para reordenação (DEPOIS - metade inferior)
+            const dropAfterEl = document.createElement('div');
+            dropAfterEl.className = 'reorder-drop-zone reorder-drop-after';
+            dropAfterEl.style.position = 'absolute';
+            dropAfterEl.style.bottom = '0';
+            dropAfterEl.style.left = '0';
+            dropAfterEl.style.right = '0';
+            dropAfterEl.style.height = '50%';
+            dropAfterEl.style.pointerEvents = 'all';
+            dropAfterEl.style.zIndex = '20';
+
+            dropAfterEl.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const draggedId = e.dataTransfer.getData('itemId');
+                if (draggedId && draggedId !== comp.id) {
+                    // Remove classes de outros elementos
+                    document.querySelectorAll('.canvas-item').forEach(el => {
+                        el.classList.remove('reorder-before', 'reorder-after');
+                    });
+                    // Adiciona classe ao elemento atual
+                    itemEl.classList.add('reorder-after');
+                }
+            });
+
+            dropAfterEl.addEventListener('dragleave', (e) => {
+                e.stopPropagation();
+                itemEl.classList.remove('reorder-after');
+            });
+
+            dropAfterEl.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                itemEl.classList.remove('reorder-after');
+                const draggedId = e.dataTransfer.getData('itemId');
+                if (draggedId && draggedId !== comp.id) {
+                    reorderComponent(draggedId, comp.id, 'after');
+                }
+            });
+
+            reorderWrapper.appendChild(dropBeforeEl);
+            reorderWrapper.appendChild(dropAfterEl);
+            itemEl.appendChild(reorderWrapper);
+        }
 
         // Evento de clique para seleção (Stop propagation para não selecionar o pai ao clicar no filho)
         itemEl.onclick = (e) => {
@@ -338,6 +620,41 @@ function renderComponentList(list, containerEl) {
         if (config.isContainer) {
             itemEl.classList.add('bg-gray-50'); // Fundo diferente para grupos
 
+            // Adicionar drag over no container inteiro - permite drop em qualquer área
+            itemEl.addEventListener('dragover', (e) => {
+                const target = e.target;
+                const isReorderZone = target.classList.contains('reorder-drop-zone');
+                const isDropZone = target.classList.contains('drop-zone');
+
+                // Se não for zona de reordenação nem drop zone interna
+                if (!isReorderZone && !isDropZone) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleContainerDragOver(e, comp.id);
+                }
+            });
+
+            itemEl.addEventListener('dragleave', (e) => {
+                const relatedTarget = e.relatedTarget;
+                // Verifica se realmente saiu do container
+                if (!relatedTarget || relatedTarget === itemEl || !itemEl.contains(relatedTarget)) {
+                    handleContainerDragLeave(e, comp.id);
+                }
+            });
+
+            itemEl.addEventListener('drop', (e) => {
+                const target = e.target;
+                const isDropZone = target.classList.contains('drop-zone');
+                const isReorderZone = target.classList.contains('reorder-drop-zone');
+
+                // Se droppou direto no container (não na zona de drop interna ou de reordenação)
+                if (!isDropZone && !isReorderZone) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleContainerDrop(e, comp.id);
+                }
+            });
+
             const dropZoneEl = document.createElement('div');
             dropZoneEl.className = 'drop-zone mt-4 border border-dashed border-gray-300 rounded bg-white p-4';
             dropZoneEl.style.minHeight = '60px';
@@ -348,7 +665,7 @@ function renderComponentList(list, containerEl) {
             dropZoneEl.setAttribute('ondrop', `handleDrop(event, '${comp.id}')`);
 
             // Renderiza os filhos recursivamente dentro desta zona
-            renderComponentList(comp.children, dropZoneEl);
+            renderComponentList(comp.children, dropZoneEl, comp.id);
 
             // Se estiver vazio, mostra dica
             if (comp.children.length === 0) {
@@ -482,10 +799,10 @@ function generateDocPreview(list) {
 function colorizeMacro(text) {
     return text.replace(/(\[@\w+)/g, '<span>$1</span>')
         .replace(/(\[\/@\w+\])/g, '<span>$1</span>')
-        .replace(/(\[\#\w+)/g, '<span>$1</span>') // Cor para lógica [#if]
-        .replace(/(\[\/\#\w+\])/g, '<span>$1</span>')
+        .replace(/(\[#\w+)/g, '<span>$1</span>') // Cor para lógica [#if]
+        .replace(/(\[\/#\w+\])/g, '<span>$1</span>')
         .replace(/(\s\w+=)/g, '<span>$1</span>')
-        .replace(/(".*?")/g, '<span>$1</span>');
+        .replace(/(\".*?\")/g, '<span>$1</span>');
 }
 
 // 8. UTILITÁRIOS
