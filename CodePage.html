@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./Css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Código FreeMarker - SigaDoc</title>
+</head>
+
+<body class="h-screen bg-gray-900">
+
+    <div class="h-full flex flex-col bg-gray-900 text-white">
+        <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
+            <span class="text-xs font-mono font-bold text-gray-400">Código FreeMarker</span>
+            <div class="flex items-center gap-3">
+                <span id="line-count" class="text-xs text-gray-500">Linhas: 0</span>
+                <button onclick="copiarCodigo()"
+                    class="text-xs px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-white">Copiar Código</button>
+            </div>
+        </div>
+
+        <!-- Container do editor com números de linha -->
+        <div class="flex-1 flex overflow-hidden">
+            <!-- Painel de números de linha -->
+            <div id="line-numbers"
+                class="bg-gray-800 text-gray-500 text-right py-4 px-2 font-mono text-sm select-none overflow-hidden border-r border-gray-700"
+                style="min-width: 50px;">
+                1
+            </div>
+
+            <!-- Textarea do código -->
+            <textarea
+                class="flex-1 p-4 overflow-auto code-preview scrollbar-thin bg-gray-900 text-white font-mono text-sm"
+                id="code-output" wrap="off" autocorrect="off" autocapitalize="none" autocomplete="off"
+                spellcheck="false" aria-label="Editor content;Press Alt+F1 for Accessibility Options." tabindex="0"
+                role="textbox" aria-roledescription="editor" aria-multiline="true" aria-haspopup="false"
+                style="border: none; outline: none; resize: none; line-height: 1.5;"></textarea>
+        </div>
+    </div>
+
+    <script src="./jS/CodePage.js"></script>
+
+</body>
+
+</html>

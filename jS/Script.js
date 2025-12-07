@@ -764,7 +764,21 @@ function updateCode() {
     code += '[/@documento]';
 
     document.getElementById('code-output').innerHTML = code;
+
+    // Salva o código no localStorage para compartilhar com outras páginas
+    localStorage.setItem('sigadoc-freemarker-code', code);
+    localStorage.setItem('sigadoc-code-source', 'visual');
 }
+
+// Escuta mudanças no localStorage de outras abas (sincronização com CodePage)
+window.addEventListener('storage', (e) => {
+    if (e.key === 'sigadoc-freemarker-code' && e.newValue) {
+        const source = localStorage.getItem('sigadoc-code-source');
+        if (source === 'codepage') {
+            document.getElementById('code-output').innerHTML = e.newValue;
+        }
+    }
+});
 
 function generateListCode(list, indentLevel) {
     let fm = '';
@@ -788,7 +802,6 @@ function generateDocPreview(list) {
     let docHtml = '';
     function traverse(items) {
         items.forEach(c => {
-            // Se for condicional, mostramos a lógica no preview do documento também
             if (c.type === 'condicional') {
                 docHtml += `[#${c.props.tipo} ${c.props.tipo !== 'else' ? c.props.expressao : ''}]\n`;
                 if (c.children) traverse(c.children);
@@ -807,7 +820,7 @@ function generateDocPreview(list) {
 function colorizeMacro(text) {
     return text.replace(/(\[@\w+)/g, '<span>$1</span>')
         .replace(/(\[\/@\w+\])/g, '<span>$1</span>')
-        .replace(/(\[#\w+)/g, '<span>$1</span>') // Cor para lógica [#if]
+        .replace(/(\[#\w+)/g, '<span>$1</span>')
         .replace(/(\[\/#\w+\])/g, '<span>$1</span>')
         .replace(/(\s\w+=)/g, '<span>$1</span>')
         .replace(/(\".*?\")/g, '<span>$1</span>');

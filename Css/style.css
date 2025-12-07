@@ -3,6 +3,12 @@ body {
     background-color: #f3f4f6;
 }
 
+summary {
+    cursor: pointer;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+}
+
 /* Estilos Drag & Drop */
 .draggable-source {
     cursor: grab;
@@ -127,4 +133,15 @@ body {
     border-color: #4f46e5;
     box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
     z-index: 10;
+}
+
+/* Página Editor de código */
+
+#line-numbers {
+    line-height: 1.5;
+    font-size: 0.875rem;
+}
+
+#code-output {
+    line-height: 1.5;
 }
