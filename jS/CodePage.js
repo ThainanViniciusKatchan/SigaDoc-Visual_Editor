@@ -24,6 +24,42 @@ codeOutput.addEventListener('scroll', () => {
     lineNumbers.scrollTop = codeOutput.scrollTop;
 });
 
+// Trata a tecla Tab para indentação (como em uma IDE)
+codeOutput.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+        e.preventDefault(); // Impede o comportamento padrão (mudar foco)
+
+        const start = codeOutput.selectionStart;
+        const end = codeOutput.selectionEnd;
+        const texto = codeOutput.value;
+        const indentacao = '    '; // 4 espaços (padrão de IDE)
+
+        if (e.shiftKey) {
+            // Shift+Tab: Remove indentação da linha atual
+            const inicioLinha = texto.lastIndexOf('\n', start - 1) + 1;
+            const linhaTrecho = texto.substring(inicioLinha, start);
+
+            // Verifica se há espaços no início da linha para remover
+            if (texto.substring(inicioLinha, inicioLinha + 4) === indentacao) {
+                codeOutput.value = texto.substring(0, inicioLinha) +
+                    texto.substring(inicioLinha + 4);
+                codeOutput.selectionStart = codeOutput.selectionEnd = start - 4;
+            } else if (texto.charAt(inicioLinha) === '\t') {
+                codeOutput.value = texto.substring(0, inicioLinha) +
+                    texto.substring(inicioLinha + 1);
+                codeOutput.selectionStart = codeOutput.selectionEnd = start - 1;
+            }
+        } else {
+            // Tab: Adiciona indentação na posição do cursor
+            codeOutput.value = texto.substring(0, start) + indentacao + texto.substring(end);
+            codeOutput.selectionStart = codeOutput.selectionEnd = start + indentacao.length;
+        }
+
+        // Dispara evento de input para atualizar números de linha e salvar
+        codeOutput.dispatchEvent(new Event('input'));
+    }
+});
+
 // Carrega o código salvo no localStorage
 function carregarCodigo() {
     const codigo = localStorage.getItem('sigadoc-freemarker-code');
