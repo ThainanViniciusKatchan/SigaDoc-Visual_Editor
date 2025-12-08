@@ -140,6 +140,113 @@ let components = [];
 let selectedId = null;
 let draggedItemId = null; // Para reordenação
 
+// Função para salvar componentes no localStorage
+function saveComponents() {
+    localStorage.setItem('sigadoc-components', JSON.stringify(components));
+    mostrarMensagemSalvo();
+}
+
+// Função para mostrar mensagem de salvamento
+function mostrarMensagemSalvo() {
+    // Remove mensagem anterior se existir
+    const msgAnterior = document.getElementById('msg-salvo');
+    if (msgAnterior) msgAnterior.remove();
+
+    // Cria nova mensagem
+    const msg = document.createElement('div');
+    msg.id = 'msg-salvo';
+    msg.textContent = 'Seu código foi salvo';
+    msg.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: fadeIn 0.3s ease;';
+    document.body.appendChild(msg);
+
+    // Remove após 2 segundos
+    setTimeout(() => msg.remove(), 2000);
+}
+
+// Função para carregar componentes do localStorage
+function loadComponents() {
+    const saved = localStorage.getItem('sigadoc-components');
+    if (saved) {
+        try {
+            components = JSON.parse(saved);
+            return true;
+        } catch (e) {
+            console.error('Erro ao carregar componentes salvos:', e);
+            components = [];
+            return false;
+        }
+    }
+    return false;
+}
+
+// Parser de código FreeMarker para componentes visuais
+function parseCodeToComponents(code) {
+    const newComponents = [];
+
+    // Regex para macros simples
+    const simpleMacroRegex = /\[@(\w+)\s+([^\]]*?)\/\]/g;
+
+    // Regex para extrair atributos
+    const attrRegex = /(\w+)="([^"]*)"/g;
+
+    // Tipos de componentes suportados
+    const supportedTypes = ['texto', 'numero', 'editor', 'memo', 'data', 'horaMinuto', 'selecao', 'checkbox', 'pessoa', 'lotacao', 'separador'];
+
+    let match;
+    while ((match = simpleMacroRegex.exec(code)) !== null) {
+        const macroType = match[1];
+        const attrString = match[2];
+
+        // Verifica se é um tipo suportado
+        if (!supportedTypes.includes(macroType)) continue;
+
+        // Extrai atributos
+        const props = {};
+        let attrMatch;
+        while ((attrMatch = attrRegex.exec(attrString)) !== null) {
+            props[attrMatch[1]] = attrMatch[2];
+        }
+        attrRegex.lastIndex = 0; // Reset regex
+
+        // Preenche props padrão se não existirem
+        const config = componentConfig[macroType];
+        if (config && config.defaultProps) {
+            Object.keys(config.defaultProps).forEach(key => {
+                if (props[key] === undefined) {
+                    props[key] = config.defaultProps[key];
+                }
+            });
+        }
+
+        // Cria componente
+        const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        newComponents.push({
+            id,
+            type: macroType,
+            props,
+            children: []
+        });
+    }
+
+    return newComponents;
+}
+
+// Sincroniza código do CodePage com componentes visuais
+function syncCodeToComponents() {
+    const savedCode = localStorage.getItem('sigadoc-freemarker-code');
+    if (!savedCode) return;
+
+    const parsedComponents = parseCodeToComponents(savedCode);
+    if (parsedComponents.length > 0) {
+        components = parsedComponents;
+        saveComponents();
+        renderCanvas();
+    }
+
+    // Exibe o código no painel
+    document.getElementById('code-output').innerHTML = savedCode;
+}
+
 // 3. LÓGICA DE DRAG AND DROP
 
 // Configura os itens da paleta
@@ -257,6 +364,7 @@ function addComponent(type, parentId) {
     renderCanvas();
     selectComponent(id);
     updateCode();
+    saveComponents();
 }
 
 function deleteComponent(id) {
@@ -281,6 +389,7 @@ function deleteComponent(id) {
     }
     renderCanvas();
     updateCode();
+    saveComponents();
 }
 
 function updateComponentProps(id, newProps) {
@@ -291,6 +400,7 @@ function updateComponentProps(id, newProps) {
         updateCode();   // Atualiza código gerado
         if (newProps.tipo) renderProperties(id);
         updateCode();
+        saveComponents();
     }
 }
 
@@ -329,6 +439,7 @@ function moveComponent(componentId, targetParentId, targetIndex) {
 
     renderCanvas();
     updateCode();
+    saveComponents();
 }
 
 // Nova função para reordenar componentes
@@ -370,6 +481,7 @@ function reorderComponent(draggedId, targetId, position) {
 
     renderCanvas();
     updateCode();
+    saveComponents();
 }
 
 // Helper para verificar se é descendente
@@ -700,7 +812,7 @@ function renderProperties(id) {
 
     let html = `<div class="mb-4 pb-2 border-b border-gray-100 font-bold text-gray-700">${componentConfig[comp.type].label}</div>`;
 
-    // Input especial para o Tipo de Condição (Select)
+    // Input para o Tipo de Condição
     if (comp.type === 'condicional') {
         html += `
             <div class="flex flex-col gap-1 mb-3">
@@ -715,7 +827,7 @@ function renderProperties(id) {
     }
 
     Object.keys(comp.props).forEach(key => {
-        // Pula 'tipo' pois já criamos o select acima
+        // esconde o tipo de condicional para selecionar no DropDown
         if (key === 'tipo' && comp.type === 'condicional') return;
 
         // Esconde o campo 'expressão' se for do tipo ELSE
@@ -757,12 +869,6 @@ function updateCode() {
     code += generateListCode(components, 1);
     code += '\n[/@entrevista]\n';
 
-    // Bloco documento
-    code += '\n[#-- Bloco do Documento --]\n[@documento]\n';
-    code += '\t<p>Conteúdo do documento...</p>\n';
-    code += generateDocPreview(components);
-    code += '[/@documento]';
-
     document.getElementById('code-output').innerHTML = code;
 
     // Salva o código no localStorage para compartilhar com outras páginas
@@ -770,7 +876,7 @@ function updateCode() {
     localStorage.setItem('sigadoc-code-source', 'visual');
 }
 
-// Escuta mudanças no localStorage de outras abas (sincronização com CodePage)
+// Sincroniza os códigos do editor visual e editor de código
 window.addEventListener('storage', (e) => {
     if (e.key === 'sigadoc-freemarker-code' && e.newValue) {
         const source = localStorage.getItem('sigadoc-code-source');
@@ -835,6 +941,7 @@ function limparCanvas() {
         renderCanvas();
         renderProperties(null);
         updateCode();
+        saveComponents();
     }
 }
 
@@ -844,5 +951,15 @@ function copiarCodigo() {
 }
 
 // Inicializa
-updateCode();
+loadComponents(); // Carrega componentes se existirem
 renderCanvas();
+
+// Verifica se o código foi editado manualmente no CodePage
+const codeSource = localStorage.getItem('sigadoc-code-source');
+if (codeSource === 'codepage') {
+    // Sincroniza código do CodePage com componentes visuais
+    syncCodeToComponents();
+} else {
+    // Regenera o código a partir dos componentes
+    updateCode();
+}
