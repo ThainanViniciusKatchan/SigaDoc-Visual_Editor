@@ -9,6 +9,7 @@ Interface Gráfica de arrasta e solta para criação de modelos FreeMarker para 
 - Agora é possível mudar campos de posição, com essa mudança você pode adicioanr um campo que estava fora de um grupo ou condição dentro do mesmo
 - Adicionado suporte a comentário no editor visual, ele é adicionado por meio de um input no mesmo local onde se adiciona o nome do campo.
 - Adicionado botão para esconder o visualizador de código do editor arrasta e solta
+- DarkMode (Modo Escuro) adicionado ao editor visual
 
 # Macros:
 - Melhorias no funcionamento das condições

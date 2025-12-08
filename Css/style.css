@@ -1,6 +1,69 @@
+/* Transição suave para mudança de tema */
+* {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f3f4f6;
+}
+
+/* Dark Mode - Body */
+.dark body,
+:root.dark body {
+    background-color: #111827;
+    color: #f3f4f6;
+}
+
+/* Dark Mode - Canvas */
+.dark #canvas.drop-zone {
+    background-image: radial-gradient(#374151 1px, transparent 1px);
+}
+
+/* Dark Mode - Canvas Item */
+.dark .canvas-item {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+/* Dark Mode - Group Container */
+.dark .group-container {
+    background-color: #1f2937;
+    border-color: #4b5563;
+}
+
+.dark .group-label {
+    color: #9ca3af;
+}
+
+/* Dark Mode - Drop Zone */
+.dark .drop-zone.drag-over {
+    background-color: #1e3a5f;
+    border-color: #6366f1;
+}
+
+/* Botão de toggle de tema */
+.theme-toggle-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.1);
+}
+
+.theme-toggle-btn svg {
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle-btn:hover svg {
+    transform: rotate(15deg);
 }
 
 summary {

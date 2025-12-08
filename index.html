@@ -6,33 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SigaDoc - Editor Visual de Modelos</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Script inline para evitar flash de conteúdo (FOUC) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="./Css/style.css">
 </head>
 
-<body class="h-screen flex flex-col overflow-hidden">
+
+<script src="./jS/DarkMode.js"></script>
+
+<body class="h-screen flex flex-col overflow-hidden bg-gray-100 dark:bg-gray-900">
 
     <!-- Cabeçalho -->
-    <header class="bg-white border-b border-gray-200 h-16 flex items-center px-6 justify-between shadow-sm z-10">
+    <header
+        class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 h-16 flex items-center px-6 justify-between shadow-sm z-10">
         <div class="flex items-center gap-2">
             <div class="bg-blue-600 text-white p-1.5 rounded">
                 <i data-lucide="file-text"></i>
             </div>
-            <h1 class="font-bold text-xl text-gray-800">SigaDoc <span class="text-blue-600 font-normal">Visual
+            <h1 class="font-bold text-xl text-gray-800 dark:text-gray-100">SigaDoc <span
+                    class="text-blue-600 dark:text-blue-400 font-normal">Visual
                     Editor</span></h1>
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 items-center">
+            <!-- Botão Toggle Tema -->
+            <button onclick="toggleTheme()"
+                class="theme-toggle-btn bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200"
+                title="Alternar tema claro/escuro">
+                <!-- Ícone Sol (mostrado no modo escuro) -->
+                <i data-lucide="sun" size="20" id="sun-icon" class="hidden"></i>
+                <!-- Ícone Lua (mostrado no modo claro) -->
+                <i data-lucide="moon" size="20" id="moon-icon"></i>
+            </button>
+
             <button onclick="copiarCodigo()"
-                class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition-colors">
+                class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md text-sm font-medium transition-colors">
                 <i data-lucide="copy" size="16"></i> Copiar Código
             </button>
             <button onclick="limparCanvas()"
-                class="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-md text-sm font-medium transition-colors">
+                class="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-md text-sm font-medium transition-colors">
                 <i data-lucide="trash-2" size="16"></i> Limpar Editor
             </button>
             <a href="./CodePage.html">
                 <button
-                    class="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md text-sm font-medium transition-colors">
+                    class="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-md text-sm font-medium transition-colors">
                     <i data-lucide="code" size="16"></i> Abrir Código
                 </button>
             </a>
@@ -42,102 +58,107 @@
     <main class="flex-1 flex overflow-hidden">
 
         <!-- Paleta (Esquerda) -->
-        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col overflow-y-auto select-none">
+        <aside
+            class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col overflow-y-auto select-none">
 
             <!-- Estrutura -->
-            <div class="p-4 border-b border-gray-100">
+            <div class="p-4 border-b border-gray-100 dark:border-gray-700">
                 <details>
-                    <summary class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Estrutura</summary>
+                    <summary class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                        Estrutura</summary>
                     <div class="space-y-2">
-                        <div class="draggable-source bg-yellow-50 border border-yellow-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-yellow-400 cursor-grab"
+                        <div class="draggable-source bg-yellow-50 dark:bg-yellow-600 border border-yellow-200 dark:border-yellow-600 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-yellow-400 cursor-grab"
                             draggable="true" data-type="grupo">
                             <i data-lucide="box" class="text-yellow-600" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Grupo (Container)</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Grupo (Container)</span>
                         </div>
-                        <div class="draggable-source bg-orange-50 border border-orange-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-orange-400 cursor-grab"
+                        <div class="draggable-source bg-orange-50 dark:bg-orange-600 border border-orange-200 dark:border-orange-600 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-orange-400 cursor-grab"
                             draggable="true" data-type="condicional">
                             <i data-lucide="git-branch" class="text-orange-600" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Condicional (If/Else)</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Condicional
+                                (If/Else)</span>
                         </div>
-                        <div class="draggable-source bg-orange-50 border border-orange-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-orange-400 cursor-grab"
+                        <div class="draggable-source bg-orange-50 dark:bg-orange-600 border border-orange-200 dark:border-orange-600 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-orange-400 cursor-grab"
                             draggable="true" data-type="variavelFreeMarker">
                             <i data-lucide="variable" class="text-orange-600" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Variável (assign)</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Variável (assign)</span>
                         </div>
 
-                        <div class="draggable-source bg-yellow-50 border border-yellow-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-yellow-400 cursor-grab"
+                        <div class="draggable-source bg-yellow-50 dark:bg-yellow-600 border border-yellow-200 dark:border-yellow-600 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-yellow-400 cursor-grab"
                             draggable="true" data-type="separador">
                             <i data-lucide="minus" class="text-yellow-600" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Separador</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Separador</span>
                         </div>
                     </div>
                 </details>
             </div>
 
             <!-- Componentes Básicos -->
-            <div class="p-4 border-b border-gray-100">
+            <div class="p-4 border-b border-gray-100 dark:border-gray-700">
                 <details>
-                    <summary class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Componentes Básicos
+                    <summary class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                        Componentes Básicos
                     </summary>
                     <div class="space-y-2">
-                        <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
+                        <div class="draggable-source bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
                             draggable="true" data-type="texto">
                             <i data-lucide="type" class="text-gray-500" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Campo Texto</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Campo Texto</span>
                         </div>
-                        <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
+                        <div class="draggable-source bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
                             draggable="true" data-type="numero">
                             <i data-lucide="binary" class="binary-gray-500" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Campo Número</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Campo Número</span>
                         </div>
-                        <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
+                        <div class="draggable-source bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
                             draggable="true" data-type="editor">
-                            <i data-lucide="text-initial" class="text-gray-500" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Editor</span>
+                            <i data-lucide="text-initial" class="text-gray-500 dark:text-gray-400" size="18"></i>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Editor</span>
                         </div>
-                        <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
+                        <div class="draggable-source bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
                             draggable="true" data-type="memo">
                             <i data-lucide="align-left" class="text-gray-500" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Texto Longo</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Texto Longo</span>
                         </div>
-                        <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
+                        <div class="draggable-source bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
                             draggable="true" data-type="data">
                             <i data-lucide="calendar" class="text-gray-500" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Data</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Data</span>
                         </div>
-                        <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
+                        <div class="draggable-source bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
                             draggable="true" data-type="horaMinuto">
                             <i data-lucide="clock" class="text-gray-500" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Hora Minuto</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Hora Minuto</span>
                         </div>
-                        <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
+                        <div class="draggable-source bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
                             draggable="true" data-type="selecao">
                             <i data-lucide="list" class="text-gray-500" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Seleção</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Seleção</span>
                         </div>
-                        <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
+                        <div class="draggable-source bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
                             draggable="true" data-type="checkbox">
                             <i data-lucide="check-square" class="text-gray-500" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Checkbox</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Checkbox</span>
                         </div>
                     </div>
                 </details>
             </div>
 
             <!-- Macros de Negócio -->
-            <div class="p-4">
+            <div class="p-4 dark:border-gray-700">
                 <details>
-                    <summary class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Macros Siga</summary>
+                    <summary class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                        Macros Siga</summary>
                     <div class="space-y-2">
-                        <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-purple-400"
+                        <div class="draggable-source bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-purple-400"
                             draggable="true" data-type="pessoa">
                             <i data-lucide="user" class="text-purple-500" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Pessoa</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Pessoa</span>
                         </div>
-                        <div class="draggable-source bg-white border border-gray-200 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-purple-400"
+                        <div class="draggable-source bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-purple-400"
                             draggable="true" data-type="lotacao">
                             <i data-lucide="building" class="text-purple-500" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700">Lotação</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Lotação</span>
                         </div>
                     </div>
                 </details>
@@ -145,17 +166,18 @@
         </aside>
 
         <!-- Canvas (Centro) -->
-        <section class="flex-1 bg-gray-50 flex flex-col relative overflow-hidden">
-            <div class="p-4 border-b border-gray-200 bg-white flex justify-between items-center">
-                <h2 class="font-medium text-gray-700 text-sm">Canvas de Entrevista</h2>
-                <span class="text-xs text-gray-400">Arraste grupos e componentes aqui</span>
+        <section class="flex-1 bg-gray-50 dark:bg-gray-800 flex flex-col relative overflow-hidden">
+            <div
+                class="p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center">
+                <h2 class="font-medium text-gray-700 dark:text-gray-400 text-sm">Canvas de Entrevista</h2>
+                <span class="text-xs text-gray-400 dark:text-gray-500">Arraste grupos e componentes aqui</span>
             </div>
 
             <!-- O Canvas em si é uma zona de drop -->
             <div id="canvas" class="flex-1 p-8 overflow-y-auto drop-zone" ondragover="handleDragOver(event)"
                 ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, null)">
                 <div id="empty-state"
-                    class="h-full flex flex-col items-center justify-center text-gray-400 pointer-events-none">
+                    class="h-full flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 pointer-events-none">
                     <i data-lucide="layout-template" size="48" class="mb-4 opacity-20"></i>
                     <p>Comece arrastando um componente</p>
                 </div>
@@ -164,20 +186,26 @@
         </section>
 
         <!-- Painel Propriedades (Direita) -->
-        <aside class="w-80 bg-white border-l border-gray-200 flex flex-col overflow-hidden">
-            <div class="flex-1 flex flex-col overflow-y-auto border-b border-gray-200">
-                <div class="p-4 bg-gray-50 border-b border-gray-200 font-medium text-sm text-gray-700">Propriedades
+        <aside
+            class="w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden">
+            <div class="flex-1 flex flex-col overflow-y-auto border-b border-gray-200 dark:border-gray-700">
+                <div
+                    class="p-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 font-medium text-sm text-gray-700 dark:text-gray-200">
+                    Propriedades
                 </div>
                 <div id="properties-panel" class="p-4 space-y-4">
-                    <p class="text-sm text-gray-500 italic text-center mt-10">Selecione um componente.</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 italic text-center mt-10">Selecione um
+                        componente.</p>
                 </div>
             </div>
 
             <details class="flex flex-col bg-gray-700 text-white">
                 <summary class="ml-5 mr-2 pt-2 pb-2">Ver Código</summary>
                 <div class="flex flex-col bg-gray-800 text-white" style="max-height: 50vh;">
-                    <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-                        <span class="text-xs font-mono font-bold text-gray-400">Código FreeMarker</span>
+                    <div
+                        class="p-2 bg-gray-800 dark:bg-gray-700 border-b border-gray-700 dark:border-gray-700 flex justify-between items-center">
+                        <span class="text-xs font-mono font-bold text-gray-400 dark:text-gray-500">Código
+                            FreeMarker</span>
                     </div>
                     <pre class="flex-1 p-4 overflow-auto code-preview scrollbar-thin" id="code-output"></pre>
                 </div>
