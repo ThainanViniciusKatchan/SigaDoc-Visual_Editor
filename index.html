@@ -173,12 +173,15 @@
                 </div>
             </div>
 
-            <div class="h-1/2 flex flex-col bg-gray-900 text-white">
-                <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
-                    <span class="text-xs font-mono font-bold text-gray-400">Código FreeMarker</span>
+            <details class="flex flex-col bg-gray-700 text-white">
+                <summary class="ml-5 mr-2 pt-2 pb-2">Ver Código</summary>
+                <div class="flex flex-col bg-gray-800 text-white" style="max-height: 50vh;">
+                    <div class="p-2 bg-gray-800 border-b border-gray-700 flex justify-between items-center">
+                        <span class="text-xs font-mono font-bold text-gray-400">Código FreeMarker</span>
+                    </div>
+                    <pre class="flex-1 p-4 overflow-auto code-preview scrollbar-thin" id="code-output"></pre>
                 </div>
-                <pre class="flex-1 p-4 overflow-auto code-preview scrollbar-thin" id="code-output"></pre>
-            </div>
+            </details>
         </aside>
 
     </main>
