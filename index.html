@@ -10,9 +10,8 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="./Css/style.css">
 </head>
-
-
 <script src="./jS/DarkMode.js"></script>
+
 
 <body class="h-screen flex flex-col overflow-hidden bg-gray-100 dark:bg-gray-900">
 
@@ -30,7 +29,7 @@
         <div class="flex gap-2 items-center">
             <!-- Botão Toggle Tema -->
             <button onclick="toggleTheme()"
-                class="theme-toggle-btn bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200"
+                class="p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200"
                 title="Alternar tema claro/escuro">
                 <!-- Ícone Sol (mostrado no modo escuro) -->
                 <i data-lucide="sun" size="20" id="sun-icon" class="hidden"></i>
@@ -67,27 +66,27 @@
                     <summary class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
                         Estrutura</summary>
                     <div class="space-y-2">
-                        <div class="draggable-source bg-yellow-50 dark:bg-yellow-600 border border-yellow-200 dark:border-yellow-600 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-yellow-400 cursor-grab"
+                        <div class="draggable-source bg-yellow-50 dark:border-yellow-200 dark:bg-gray-800 border border-yellow-200 dark:border-yellow-600 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-yellow-400 cursor-grab"
                             draggable="true" data-type="grupo">
                             <i data-lucide="box" class="text-yellow-600" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Grupo (Container)</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-white">Grupo (Container)</span>
                         </div>
-                        <div class="draggable-source bg-orange-50 dark:bg-orange-600 border border-orange-200 dark:border-orange-600 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-orange-400 cursor-grab"
+                        <div class="draggable-source bg-orange-50 dark:border-orange-200 dark:bg-gray-800 border border-orange-200 dark:border-orange-600 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-orange-400 cursor-grab"
                             draggable="true" data-type="condicional">
                             <i data-lucide="git-branch" class="text-orange-600" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Condicional
+                            <span class="text-sm font-medium text-gray-700 dark:text-white">Condicional
                                 (If/Else)</span>
                         </div>
-                        <div class="draggable-source bg-orange-50 dark:bg-orange-600 border border-orange-200 dark:border-orange-600 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-orange-400 cursor-grab"
+                        <div class="draggable-source bg-orange-50 dark:border-orange-200 dark:bg-gray-800 border border-orange-200 dark:border-orange-600 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-orange-400 cursor-grab"
                             draggable="true" data-type="variavelFreeMarker">
                             <i data-lucide="variable" class="text-orange-600" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Variável (assign)</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-white">Variável (assign)</span>
                         </div>
 
-                        <div class="draggable-source bg-yellow-50 dark:bg-yellow-600 border border-yellow-200 dark:border-yellow-600 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-yellow-400 cursor-grab"
+                        <div class="draggable-source bg-yellow-50 dark:border-yellow-200 dark:bg-gray-800 border border-yellow-200 dark:border-yellow-600 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-yellow-400 cursor-grab"
                             draggable="true" data-type="separador">
                             <i data-lucide="minus" class="text-yellow-600" size="18"></i>
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Separador</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-white">Separador</span>
                         </div>
                     </div>
                 </details>
@@ -107,7 +106,7 @@
                         </div>
                         <div class="draggable-source bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"
                             draggable="true" data-type="numero">
-                            <i data-lucide="binary" class="binary-gray-500" size="18"></i>
+                            <i data-lucide="binary" class="binary-gray-700" size="18"></i>
                             <span class="text-sm font-medium text-gray-700 dark:text-gray-400">Campo Número</span>
                         </div>
                         <div class="draggable-source bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 rounded-md shadow-sm flex items-center gap-3 hover:border-blue-400"

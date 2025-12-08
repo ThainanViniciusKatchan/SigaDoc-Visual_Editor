@@ -11,12 +11,11 @@ const componentConfig = {
             let colorClass = props.tipo === 'else' ? 'text-orange-600' : 'text-blue-600';
             let labelTipo = props.tipo.toUpperCase();
             let desc = props.tipo === 'else' ? '(Senão)' : `(${props.expressao})`;
-            return `
+            return `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div>
                 <div class="flex items-center gap-2 mb-2">
                     <span class="text-xs font-bold px-2 py-1 rounded bg-gray-200 ${colorClass}">${labelTipo}</span>
-                    <span class="text-sm font-medium text-gray-700 truncate">${desc}</span>
+                    <span class="text-sm font-medium text-gray-700 truncate dark:text-orange-400">${desc}</span>
                 </div>
-                <div class="text-[10px] text-gray-400">Arraste o conteúdo para dentro</div>
             `;
         },
         generateFM: (props, childrenCode) => {
@@ -39,7 +38,7 @@ const componentConfig = {
         label: 'Variável FreeMarker',
         icon: 'type',
         defaultProps: { var: 'Nome', valor: 'Valor', Comentario: '' },
-        renderPreview: (props) => `<div style="display: flex; flex-direction: row; gap: 5px; justify-content: center; align-items: center;"><label class="block text-sm font-bold text-gray-700">${props.var}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.var}}">${props.valor}:<input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.valor}}"></div>`,
+        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><div style="display: flex; flex-direction: row; gap: 5px; justify-content: center; align-items: center;"><label class="block text-sm font-bold text-gray-700 dark:text-white">${props.var}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700" placeholder="\${${props.var}}">${props.valor}:<input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700" placeholder="\${${props.valor}}"></div>`,
         generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[#assign ${props.var} = ${props.valor}]`
     },
     grupo: {
@@ -48,7 +47,7 @@ const componentConfig = {
         // "children" será o array que conterá os itens aninhados
         isContainer: true,
         defaultProps: { titulo: 'Título do Grupo', depende: '', Comentario: '' },
-        renderPreview: (props) => `<div class="font-bold text-gray-700 mb-2">${props.titulo}</div><div class="text-xs text-gray-400">${props.depende ? 'Depende de: ' + props.depende : ''}</div>`,
+        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><div class="font-bold text-gray-700 dark:text-yellow-500 mb-2">${props.titulo}</div><div class="text-xs text-gray-400 dark:text-gray-400">${props.depende ? 'Depende de: ' + props.depende : ''}</div>`,
         // O generateFM recebe "childrenCode" que é o código já processado dos filhos
         generateFM: (props, childrenCode) => {
             let attr = `titulo="${props.titulo}"`;
@@ -68,70 +67,70 @@ const componentConfig = {
         label: 'Campo Texto',
         icon: 'type',
         defaultProps: { titulo: 'Campo Texto', var: 'txt_var', largura: '', maxcaracteres: '', Comentario: '' },
-        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.var}}">`,
+        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><label class="block text-sm font-bold text-gray-700 dark:text-white">${props.titulo}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700" placeholder="\${${props.var}}">`,
         generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@texto titulo="${props.titulo}" var="${props.var}" largura="${props.largura}" maxcaracteres="${props.maxcaracteres}" /]`
     },
     numero: {
         label: 'Campo Número',
         icon: 'binary',
         defaultProps: { titulo: 'Campo numero', var: 'number_var', largura: '', maxcaracteres: '', Comentario: '' },
-        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.var}}">`,
+        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><label class="block text-sm font-bold text-gray-700 dark:text-white">${props.titulo}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700" placeholder="\${${props.var}}">`,
         generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@numero titulo="${props.titulo}" var="${props.var}" largura="${props.largura}" maxcaracteres="${props.maxcaracteres}" /]`
     },
     editor: {
         label: 'Campo Editor',
         icon: 'text-initial',
         defaultProps: { titulo: 'Editor', var: 'editor_var', Comentario: '' },
-        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><textarea disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 h-16"></textarea>`,
+        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><label class="block text-sm font-bold text-gray-700 dark:text-white">${props.titulo}:</label><textarea disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700 h-16"></textarea>`,
         generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@editor titulo="${props.titulo}" var="${props.var}" /]`
     },
     memo: {
         label: 'Campo Texto Longo',
         icon: 'align-left',
         defaultProps: { titulo: 'Observações', var: 'memo_var', linhas: '3', colunas: '60', Comentario: '' },
-        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><textarea disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 h-16"></textarea>`,
+        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><label class="block text-sm font-bold text-gray-700 dark:text-white">${props.titulo}:</label><textarea disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700 h-16"></textarea>`,
         generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@memo titulo="${props.titulo}" var="${props.var}" linhas="${props.linhas}" colunas="${props.colunas}" /]`
     },
     data: {
         label: 'Data',
         icon: 'calendar',
         defaultProps: { titulo: 'Data', var: 'dt_var', Comentario: '' },
-        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="relative"><input type="text" disabled class="w-32 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="__/__/____"><i data-lucide="calendar" class="absolute right-2 top-1.5 w-4 h-4 text-gray-400"></i></div>`,
+        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><label class="block text-sm font-bold text-gray-700 dark:text-white">${props.titulo}:</label><div class="relative"><input type="text" disabled class="w-32 border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700" placeholder="__/__/____"><i data-lucide="calendar" class="absolute right-2 top-1.5 w-4 h-4 text-gray-400"></i></div>`,
         generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@data titulo="${props.titulo}" var="${props.var}" /]`
     },
     horaMinuto: {
         label: 'Hora Minuto',
         icon: 'clock',
         defaultProps: { titulo: 'Hora Minuto', var: 'hr_var', Comentario: '' },
-        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="relative"><input type="text" disabled class="w-32 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="__:__"><i data-lucide="clock" class="absolute right-2 top-1.5 w-4 h-4 text-gray-400"></i></div>`,
+        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><label class="block text-sm font-bold text-gray-700 dark:text-white">${props.titulo}:</label><div class="relative"><input type="text" disabled class="w-32 border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700" placeholder="__:__"><i data-lucide="clock" class="absolute right-2 top-1.5 w-4 h-4 text-gray-400"></i></div>`,
         generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@horaMinuto titulo="${props.titulo}" var="${props.var}" /]`
     },
     selecao: {
         label: 'Seleção',
         icon: 'list',
         defaultProps: { titulo: 'Selecione', var: 'sel_var', opcoes: 'A;B;C', idAjax: 'Idêntificador do Ajax', reler: true, Comentario: '' },
-        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><select disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50"><option>Selecione...</option></select>`,
+        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><label class="block text-sm font-bold text-gray-700 dark:text-white">${props.titulo}:</label><select disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700"><option>Selecione...</option></select>`,
         generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@selecao titulo="${props.titulo}" var="${props.var}" opcoes="${props.opcoes}" idAjax="${props.idAjax}" reler="${props.reler}" /]`
     },
     checkbox: {
         label: 'Checkbox',
         icon: 'check-square',
         defaultProps: { titulo: 'Confirmação', var: 'chk_var', reler: "", Comentario: '' },
-        renderPreview: (props) => `<div class="flex items-center gap-2 mt-2"><input type="checkbox" disabled><label class="text-sm font-bold text-gray-700">${props.titulo}</label></div>`,
+        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><div class="flex items-center gap-2 mt-2"><input type="checkbox" disabled><label class="text-sm font-bold text-gray-700 dark:text-white">${props.titulo}</label></div>`,
         generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@checkbox titulo="${props.titulo}" var="${props.var}" reler="${props.reler}" /]`
     },
     pessoa: {
         label: 'Pesquisa de Pessoa',
         icon: 'user',
         defaultProps: { titulo: 'Servidor', var: 'p_servidor', Comentario: '' },
-        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="flex gap-1"><input type="text" disabled class="flex-1 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="Matrícula/Nome"><button disabled class="px-2 bg-gray-200 rounded">...</button></div>`,
+        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><label class="block text-sm font-bold text-gray-700 dark:text-white">${props.titulo}:</label><div class="flex gap-1"><input type="text" disabled class="flex-1 border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700" placeholder="Matrícula/Nome"><button disabled class="px-2 bg-gray-200 dark:bg-gray-700 rounded">...</button></div>`,
         generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@pessoa titulo="${props.titulo}" var="${props.var}" /]`
     },
     lotacao: {
         label: 'Pesquisa de Lotação',
         icon: 'building',
         defaultProps: { titulo: 'Unidade', var: 'l_unidade', Comentario: '' },
-        renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="flex gap-1"><input type="text" disabled class="flex-1 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="Sigla/Nome"><button disabled class="px-2 bg-gray-200 rounded">...</button></div>`,
+        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><label class="block text-sm font-bold text-gray-700 dark:text-white">${props.titulo}:</label><div class="flex gap-1"><input type="text" disabled class="flex-1 border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700" placeholder="Sigla/Nome"><button disabled class="px-2 bg-gray-200 dark:bg-gray-700 rounded">...</button></div>`,
         generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@lotacao titulo="${props.titulo}" var="${props.var}" /]`
     }
 };
@@ -776,7 +775,7 @@ function renderComponentList(list, containerEl, parentId) {
             });
 
             const dropZoneEl = document.createElement('div');
-            dropZoneEl.className = 'drop-zone mt-4 border border-dashed border-gray-300 rounded bg-white p-4';
+            dropZoneEl.className = 'drop-zone mt-4 border border-dashed border-gray-300 rounded bg-white p-4 dark:bg-gray-700 dark:text-white';
             dropZoneEl.style.minHeight = '60px';
 
             // Configura eventos de drop para este container específico
@@ -818,7 +817,7 @@ function renderProperties(id) {
         html += `
             <div class="flex flex-col gap-1 mb-3">
                 <label class="text-xs font-bold text-gray-600 uppercase">Tipo de Condição</label>
-                <select name="tipo" class="border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <select name="tipo" class="border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:bg-gray-700 dark:text-white">
                     <option value="if" ${comp.props.tipo === 'if' ? 'selected' : ''}>IF (Se)</option>
                     <option value="elseif" ${comp.props.tipo === 'elseif' ? 'selected' : ''}>ELSE IF (Senão Se)</option>
                     <option value="else" ${comp.props.tipo === 'else' ? 'selected' : ''}>ELSE (Senão)</option>
@@ -844,10 +843,10 @@ function renderProperties(id) {
 
         html += `
             <div class="flex flex-col gap-1 mb-3">
-                <label class="text-xs font-bold text-gray-600 uppercase">${label}</label>
-                <input type="text" name="${key}" value="${comp.props[key]}" 
-                    class="border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                ${helpText ? `<span class="text-[10px] text-gray-400">${helpText}</span>` : ''}
+                <label class="text-xs font-bold text-gray-600 uppercase dark:text-gray-400">${label}</label>
+                <input type="text" name="${key}" value="${comp.props[key]}" autocomplete="off" 
+                    class="border border-gray-300 rounded px-2 py-1.5 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                ${helpText ? `<span class="text-[10px] text-gray-400 dark:text-gray-600">${helpText}</span>` : ''}
             </div>
         `;
     });
