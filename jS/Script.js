@@ -6,7 +6,7 @@ const componentConfig = {
         label: 'Condição (If/Else)',
         icon: 'git-branch', // Ícone de ramificação
         isContainer: true,  // Permite arrastar itens para dentro
-        defaultProps: { tipo: 'if', expressao: 'variável == "valor"' },
+        defaultProps: { tipo: 'if', expressao: 'variável == "valor"', Comentario: '' },
         renderPreview: (props) => {
             let colorClass = props.tipo === 'else' ? 'text-orange-600' : 'text-blue-600';
             let labelTipo = props.tipo.toUpperCase();
@@ -25,35 +25,36 @@ const componentConfig = {
 
             if (props.tipo === 'if') {
                 // Se for IF, abre e fecha o bloco
-                return `[#if${expr}]\n${childrenCode}\n\t[/#if]`;
+                return `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[#if${expr}]\n${childrenCode}\n\t[/#if]`;
             } else if (props.tipo === 'elseif') {
                 // Elseif apenas injeta a tag, o fechamento depende do IF pai
-                return `[#elseif${expr}]\n${childrenCode}`;
+                return `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[#elseif${expr}]\n${childrenCode}`;
             } else {
                 // Else não tem expressão e não fecha tag própria
-                return `[#else]\n${childrenCode}`;
+                return `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[#else]\n${childrenCode}`;
             }
         }
     },
     variavelFreeMarker: {
         label: 'Variável FreeMarker',
         icon: 'type',
-        defaultProps: { var: 'Nome', valor: 'Valor' },
+        defaultProps: { var: 'Nome', valor: 'Valor', Comentario: '' },
         renderPreview: (props) => `<div style="display: flex; flex-direction: row; gap: 5px; justify-content: center; align-items: center;"><label class="block text-sm font-bold text-gray-700">${props.var}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.var}}">${props.valor}:<input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.valor}}"></div>`,
-        generateFM: (props) => `[#assign ${props.var} = ${props.valor}]`
+        generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[#assign ${props.var} = ${props.valor}]`
     },
     grupo: {
         label: 'Grupo',
         icon: 'box',
         // "children" será o array que conterá os itens aninhados
         isContainer: true,
-        defaultProps: { titulo: 'Título do Grupo', depende: '' },
+        defaultProps: { titulo: 'Título do Grupo', depende: '', Comentario: '' },
         renderPreview: (props) => `<div class="font-bold text-gray-700 mb-2">${props.titulo}</div><div class="text-xs text-gray-400">${props.depende ? 'Depende de: ' + props.depende : ''}</div>`,
         // O generateFM recebe "childrenCode" que é o código já processado dos filhos
         generateFM: (props, childrenCode) => {
             let attr = `titulo="${props.titulo}"`;
             if (props.depende) attr += ` depende="${props.depende}"`;
-            return `[@grupo ${attr}]\n${childrenCode}\t[/@grupo]`;
+            return `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n 
+            [@grupo  ${attr}]\n${childrenCode}\t[/@grupo]`;
         }
     },
     separador: {
@@ -66,72 +67,72 @@ const componentConfig = {
     texto: {
         label: 'Campo Texto',
         icon: 'type',
-        defaultProps: { titulo: 'Campo Texto', var: 'txt_var', largura: '', maxcaracteres: '' },
+        defaultProps: { titulo: 'Campo Texto', var: 'txt_var', largura: '', maxcaracteres: '', Comentario: '' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.var}}">`,
-        generateFM: (props) => `[@texto titulo="${props.titulo}" var="${props.var}" largura="${props.largura}" maxcaracteres="${props.maxcaracteres}" /]`
+        generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@texto titulo="${props.titulo}" var="${props.var}" largura="${props.largura}" maxcaracteres="${props.maxcaracteres}" /]`
     },
     numero: {
         label: 'Campo Número',
         icon: 'binary',
-        defaultProps: { titulo: 'Campo numero', var: 'number_var', largura: '', maxcaracteres: '' },
+        defaultProps: { titulo: 'Campo numero', var: 'number_var', largura: '', maxcaracteres: '', Comentario: '' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="\${${props.var}}">`,
-        generateFM: (props) => `[@numero titulo="${props.titulo}" var="${props.var}" largura="${props.largura}" maxcaracteres="${props.maxcaracteres}" /]`
+        generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@numero titulo="${props.titulo}" var="${props.var}" largura="${props.largura}" maxcaracteres="${props.maxcaracteres}" /]`
     },
     editor: {
         label: 'Campo Editor',
         icon: 'text-initial',
-        defaultProps: { titulo: 'Editor', var: 'editor_var' },
+        defaultProps: { titulo: 'Editor', var: 'editor_var', Comentario: '' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><textarea disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 h-16"></textarea>`,
-        generateFM: (props) => `[@editor titulo="${props.titulo}" var="${props.var}" /]`
+        generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@editor titulo="${props.titulo}" var="${props.var}" /]`
     },
     memo: {
         label: 'Campo Texto Longo',
         icon: 'align-left',
-        defaultProps: { titulo: 'Observações', var: 'memo_var', linhas: '3', colunas: '60' },
+        defaultProps: { titulo: 'Observações', var: 'memo_var', linhas: '3', colunas: '60', Comentario: '' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><textarea disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 h-16"></textarea>`,
-        generateFM: (props) => `[@memo titulo="${props.titulo}" var="${props.var}" linhas="${props.linhas}" colunas="${props.colunas}" /]`
+        generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@memo titulo="${props.titulo}" var="${props.var}" linhas="${props.linhas}" colunas="${props.colunas}" /]`
     },
     data: {
         label: 'Data',
         icon: 'calendar',
-        defaultProps: { titulo: 'Data', var: 'dt_var' },
+        defaultProps: { titulo: 'Data', var: 'dt_var', Comentario: '' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="relative"><input type="text" disabled class="w-32 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="__/__/____"><i data-lucide="calendar" class="absolute right-2 top-1.5 w-4 h-4 text-gray-400"></i></div>`,
-        generateFM: (props) => `[@data titulo="${props.titulo}" var="${props.var}" /]`
+        generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@data titulo="${props.titulo}" var="${props.var}" /]`
     },
     horaMinuto: {
         label: 'Hora Minuto',
         icon: 'clock',
-        defaultProps: { titulo: 'Hora Minuto', var: 'hr_var' },
+        defaultProps: { titulo: 'Hora Minuto', var: 'hr_var', Comentario: '' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="relative"><input type="text" disabled class="w-32 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="__:__"><i data-lucide="clock" class="absolute right-2 top-1.5 w-4 h-4 text-gray-400"></i></div>`,
-        generateFM: (props) => `[@horaMinuto titulo="${props.titulo}" var="${props.var}" /]`
+        generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@horaMinuto titulo="${props.titulo}" var="${props.var}" /]`
     },
     selecao: {
         label: 'Seleção',
         icon: 'list',
-        defaultProps: { titulo: 'Selecione', var: 'sel_var', opcoes: 'A;B;C', idAjax: 'Idêntificador do Ajax', reler: true },
+        defaultProps: { titulo: 'Selecione', var: 'sel_var', opcoes: 'A;B;C', idAjax: 'Idêntificador do Ajax', reler: true, Comentario: '' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><select disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50"><option>Selecione...</option></select>`,
-        generateFM: (props) => `[@selecao titulo="${props.titulo}" var="${props.var}" opcoes="${props.opcoes}" idAjax="${props.idAjax}" reler="${props.reler}" /]`
+        generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@selecao titulo="${props.titulo}" var="${props.var}" opcoes="${props.opcoes}" idAjax="${props.idAjax}" reler="${props.reler}" /]`
     },
     checkbox: {
         label: 'Checkbox',
         icon: 'check-square',
-        defaultProps: { titulo: 'Confirmação', var: 'chk_var', reler: "" },
+        defaultProps: { titulo: 'Confirmação', var: 'chk_var', reler: "", Comentario: '' },
         renderPreview: (props) => `<div class="flex items-center gap-2 mt-2"><input type="checkbox" disabled><label class="text-sm font-bold text-gray-700">${props.titulo}</label></div>`,
-        generateFM: (props) => `[@checkbox titulo="${props.titulo}" var="${props.var}" reler="${props.reler}" /]`
+        generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@checkbox titulo="${props.titulo}" var="${props.var}" reler="${props.reler}" /]`
     },
     pessoa: {
         label: 'Pesquisa de Pessoa',
         icon: 'user',
-        defaultProps: { titulo: 'Servidor', var: 'p_servidor' },
+        defaultProps: { titulo: 'Servidor', var: 'p_servidor', Comentario: '' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="flex gap-1"><input type="text" disabled class="flex-1 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="Matrícula/Nome"><button disabled class="px-2 bg-gray-200 rounded">...</button></div>`,
-        generateFM: (props) => `[@pessoa titulo="${props.titulo}" var="${props.var}" /]`
+        generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@pessoa titulo="${props.titulo}" var="${props.var}" /]`
     },
     lotacao: {
         label: 'Pesquisa de Lotação',
         icon: 'building',
-        defaultProps: { titulo: 'Unidade', var: 'l_unidade' },
+        defaultProps: { titulo: 'Unidade', var: 'l_unidade', Comentario: '' },
         renderPreview: (props) => `<label class="block text-sm font-bold text-gray-700">${props.titulo}:</label><div class="flex gap-1"><input type="text" disabled class="flex-1 border border-gray-300 rounded px-2 py-1 bg-gray-50" placeholder="Sigla/Nome"><button disabled class="px-2 bg-gray-200 rounded">...</button></div>`,
-        generateFM: (props) => `[@lotacao titulo="${props.titulo}" var="${props.var}" /]`
+        generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[@lotacao titulo="${props.titulo}" var="${props.var}" /]`
     }
 };
 
