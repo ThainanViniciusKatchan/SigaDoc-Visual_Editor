@@ -8,3 +8,4 @@ Interface Gráfica de arrasta e solta para criação de modelos FreeMarker para 
 - Agora é possível mudar campos de posição, com essa mudança você pode adicioanr um campo que estava fora de um grupo ou condição dentro do mesmo
 - Adicionado suporte a variáveis (assign)
 - Adicionado uma página com editor de código escrito, para case seja necessário alterar o código manualmente, a página possui um editor de código que atualiza o código em tempo real e possui números de linha para facilitar a leitura.
+- Agora os dois editores são sincronizados e mudanças realizadas no editor visual são refletidas no editor de código e vice-versa.
