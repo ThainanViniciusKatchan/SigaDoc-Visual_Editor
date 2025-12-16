@@ -2,6 +2,39 @@ lucide.createIcons();
 
 // CONFIGURAÇÃO DOS COMPONENTES
 const componentConfig = {
+    loopinput: {
+        label: 'Input Dinâmico',
+        icon: 'form',
+        // "children" será o array que conterá os itens aninhados
+        isContainer: true,
+        defaultProps: { titulo: 'Título do Grupo', depende: '', varQuantidade: 'numItens', varAjax: 'numItensAjax', Comentario: '' },
+        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><div class="font-bold text-gray-700 dark:text-yellow-500 mb-2">${props.titulo}</div><div class="text-xs text-gray-400 dark:text-gray-400">${props.depende ? 'Depende de: ' + props.depende : ''}</div><div class="text-xs text-purple-500 mt-1">Loop: ${props.varQuantidade} (Ajax: ${props.varAjax})</div>`,
+        // O generateFM recebe "childrenCode" que é o código já processado dos filhos
+        generateFM: (props, childrenCode) => {
+            let attrGrupo = `titulo="${props.titulo}"`;
+            if (props.depende) attrGrupo += ` depende="${props.depende}"`;
+
+            return `${props.Comentario ? `[#--${props.Comentario}--]\n` : ''}[#-- Variável com a quantidade de opções da seleção --]
+[#assign tamanhoOpcoes = "0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15" /]
+[@grupo ${attrGrupo}]
+    [@selecao titulo="Quantidade" var="${props.varQuantidade}" reler=true idAjax="${props.varAjax}" opcoes=tamanhoOpcoes /]
+    [@grupo depende="${props.varAjax}"]
+        [#if ${props.varQuantidade}! != '0']
+            [#list 1..(${props.varQuantidade})?number as i]
+                [@grupo]
+                // TODO 
+                **
+                Adicionar uma forma de passar o valor de i do list 
+                freeMarker para o childrenCode
+                **
+                ${childrenCode}
+                [/@grupo]
+            [/#list]
+        [/#if]
+    [/@grupo]
+[/@grupo]`;
+        }
+    },
     condicional: {
         label: 'Condição (If/Else)',
         icon: 'git-branch', // Ícone de ramificação
