@@ -2,36 +2,84 @@ lucide.createIcons();
 
 // CONFIGURAÇÃO DOS COMPONENTES
 const componentConfig = {
+    // Componentes prontos
+    DadosServidor: {
+        label: 'Dados do Servidor',
+        icon: 'people',
+        isContainer: false,
+        defaultProps: { Comentario: '' },
+        renderPreview: (props) => `
+        <div class="font-bold text-blue-700 dark:text-blue-500 mb-2">
+        ${props.Comentario ? `[#--${props.Comentario}--]` : ''}
+        </div>
+        <p class="text-90 font-bold text-blue-700 dark:text-blue-500">[#--Input pronto que recebe automaticamente as informações do servidor--]</p>
+        <div class="font-bold text-gray-700 dark:text-yellow-500 mb-2">Dados do Servidor
+        </div>`,
+        generateFM: (props) => {
+            const SigaVar = {
+                Cadastrante: '${(doc.cadastrante.descricao)!}',
+                MatriculaCadastrante: '${(doc.cadastrante.sigla)!}',
+                CPFCadastrante: '${(doc.cadastrante.cpfFormatado)!}',
+                telefone_contato: '${(doc.cadastrante.telefone_contato)!}',
+                lotacao_manual: '${(doc.cadastrante.lotacao.orgaoUsuario.descricao)!}',
+                cargo_manual: '${(doc.cadastrante.cargo.descricao)!}',
+            }
+            return `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n 
+        [@grupo titulo="Dados do Cadastrante"]
+        &lt;div style="display: inline-flex; gap: 10px; flex-wrap: wrap;">
+            &lt;div style="width: 350px;">
+                [@texto titulo="Nome" var="NomeCadastrante" default="${SigaVar.Cadastrante}" obrigatorio="Sim"/]
+            &lt;/div>
+            	[@texto titulo="Matrícula" var="MatriculaCadastrante" default="${SigaVar.MatriculaCadastrante}" obrigatorio="Sim"/]
+            	[@campo tipo="cpf" titulo="CPF" var="CPFCadastrante" default="${SigaVar.CPFCadastrante}" obrigatorio=true/]
+            &lt;div class="col-2" style="margin-left: -30px;">
+            	[@field kind="telefone" var="telefone_contato" title="Telefone de Contato" required=true/]
+            &lt;/div>
+            &lt;div style="width: 480px; margin-left: -30px;">
+            	[@texto var="lotacao_manual" titulo="Lotação" obrigatorio="Sim" default="${SigaVar.lotacao_manual}" /]
+            &lt;/div>
+            &lt;div style="display: inline-flex; gap: 10px; margin-top: -15px;">
+            	[@texto var="cargo_manual" titulo="Cargo" largura="50" maxcaracteres="100" obrigatorio="Sim" default="${SigaVar.cargo_manual}" /]
+            	[#assign horahoje = doc.getData()?substring(0,16)/]
+            	[@texto var="horahoje" titulo="Data Solicitação" atts={'readonly':'readonly'}/]
+        	&lt;/div>
+        &lt;/div>
+        &lt;p style="background: red; padding: 2px; width: 45%; text-align: center; color: white; margin-top: 10px;">
+        Os campos acima são <strong>obrigatórios</strong> | Confira todas as informações antes de prosseguir
+        &lt;/p>
+    [/@grupo]`
+        },
+    },
     loopinput: {
         label: 'Input Dinâmico',
         icon: 'form',
         // "children" será o array que conterá os itens aninhados
         isContainer: true,
         defaultProps: { titulo: 'Título do Grupo', depende: '', varQuantidade: 'numItens', varAjax: 'numItensAjax', Comentario: '' },
-        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><div class="font-bold text-gray-700 dark:text-yellow-500 mb-2">${props.titulo}</div><div class="text-xs text-gray-400 dark:text-gray-400">${props.depende ? 'Depende de: ' + props.depende : ''}</div><div class="text-xs text-purple-500 mt-1">Loop: ${props.varQuantidade} (Ajax: ${props.varAjax})</div>`,
+        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div ><div class="font-bold text-gray-700 dark:text-yellow-500 mb-2">${props.titulo}</div><div class="text-xs text-gray-400 dark:text-gray-400">${props.depende ? 'Depende de: ' + props.depende : ''}</div><div class="text-xs text-purple-500 mt-1">Loop: ${props.varQuantidade} (Ajax: ${props.varAjax})</div>`,
         // O generateFM recebe "childrenCode" que é o código já processado dos filhos
         generateFM: (props, childrenCode) => {
-            let attrGrupo = `titulo="${props.titulo}"`;
-            if (props.depende) attrGrupo += ` depende="${props.depende}"`;
+            let attrGrupo = `titulo = "${props.titulo}"`;
+            if (props.depende) attrGrupo += ` depende = "${props.depende}"`;
 
-            return `${props.Comentario ? `[#--${props.Comentario}--]\n` : ''}[#-- Variável com a quantidade de opções da seleção --]
+            return `${props.Comentario ? `[#--${props.Comentario}--]\n` : ''} [#-- Variável com a quantidade de opções da seleção--]
 [#assign tamanhoOpcoes = "0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15" /]
 [@grupo ${attrGrupo}]
-    [@selecao titulo="Quantidade" var="${props.varQuantidade}" reler=true idAjax="${props.varAjax}" opcoes=tamanhoOpcoes /]
-    [@grupo depende="${props.varAjax}"]
-        [#if ${props.varQuantidade}! != '0']
-            [#list 1..(${props.varQuantidade})?number as i]
-                [@grupo]
-                // TODO 
-                **
-                Adicionar uma forma de passar o valor de i do list 
+[@selecao titulo = "Quantidade" var="${props.varQuantidade}" reler = true idAjax = "${props.varAjax}" opcoes = tamanhoOpcoes /]
+[@grupo depende = "${props.varAjax}"]
+[#if ${props.varQuantidade} ! != '0']
+[#list 1..(${props.varQuantidade}) ? number as i]
+[@grupo]
+    // TODO 
+    **
+    Adicionar uma forma de passar o valor de i do list 
                 freeMarker para o childrenCode
-                **
-                ${childrenCode}
-                [/@grupo]
-            [/#list]
-        [/#if]
-    [/@grupo]
+    **
+    ${childrenCode}
+[/@grupo]
+[/#list]
+[/#if]
+[/@grupo]
 [/@grupo]`;
         }
     },
@@ -44,26 +92,26 @@ const componentConfig = {
             let colorClass = props.tipo === 'else' ? 'text-orange-600' : 'text-blue-600';
             let labelTipo = props.tipo.toUpperCase();
             let desc = props.tipo === 'else' ? '(Senão)' : `(${props.expressao})`;
-            return `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div>
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="text-xs font-bold px-2 py-1 rounded bg-gray-200 ${colorClass}">${labelTipo}</span>
-                    <span class="text-sm font-medium text-gray-700 truncate dark:text-orange-400">${desc}</span>
-                </div>
-            `;
+            return `< div class="font-bold text-blue-700 dark:text-blue-500 mb-2" > ${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div >
+    <div class="flex items-center gap-2 mb-2">
+        <span class="text-xs font-bold px-2 py-1 rounded bg-gray-200 ${colorClass}">${labelTipo}</span>
+        <span class="text-sm font-medium text-gray-700 truncate dark:text-orange-400">${desc}</span>
+    </div>
+`;
         },
         generateFM: (props, childrenCode) => {
             // Lógica de Geração do FreeMarker
-            const expr = props.expressao ? ` ${props.expressao}` : '';
+            const expr = props.expressao ? ` ${props.expressao} ` : '';
 
             if (props.tipo === 'if') {
                 // Se for IF, abre e fecha o bloco
-                return `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[#if${expr}]\n${childrenCode}\n\t[/#if]`;
+                return `${props.Comentario ? `[#--${props.Comentario}--]` : ''} \n[#if${expr}]\n${childrenCode} \n\t[/#if]`;
             } else if (props.tipo === 'elseif') {
                 // Elseif apenas injeta a tag, o fechamento depende do IF pai
-                return `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[#elseif${expr}]\n${childrenCode}`;
+                return `${props.Comentario ? `[#--${props.Comentario}--]` : ''} \n[#elseif${expr}]\n${childrenCode} `;
             } else {
                 // Else não tem expressão e não fecha tag própria
-                return `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[#else]\n${childrenCode}`;
+                return `${props.Comentario ? `[#--${props.Comentario}--]` : ''} \n[#else]\n${childrenCode} `;
             }
         }
     },
@@ -71,7 +119,7 @@ const componentConfig = {
         label: 'Variável FreeMarker',
         icon: 'type',
         defaultProps: { var: 'Nome', valor: 'Valor', Comentario: '' },
-        renderPreview: (props) => `<div class="font-bold text-blue-700 dark:text-blue-500 mb-2">${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div><div style="display: flex; flex-direction: row; gap: 5px; justify-content: center; align-items: center;"><label class="block text-sm font-bold text-gray-700 dark:text-white">${props.var}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700" placeholder="\${${props.var}}">${props.valor}:<input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700" placeholder="\${${props.valor}}"></div>`,
+        renderPreview: (props) => `< div class="font-bold text-blue-700 dark:text-blue-500 mb-2" > ${props.Comentario ? `[#--${props.Comentario}--]` : ''}</div > <div style="display: flex; flex-direction: row; gap: 5px; justify-content: center; align-items: center;"><label class="block text-sm font-bold text-gray-700 dark:text-white">${props.var}:</label><input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700" placeholder="\${${props.var}}">${props.valor}:<input type="text" disabled class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 dark:bg-gray-700" placeholder="\${${props.valor}}"></div>`,
         generateFM: (props) => `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n[#assign ${props.var} = ${props.valor}]`
     },
     grupo: {
@@ -85,8 +133,8 @@ const componentConfig = {
         generateFM: (props, childrenCode) => {
             let attr = `titulo="${props.titulo}"`;
             if (props.depende) attr += ` depende="${props.depende}"`;
-            return `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n 
-            [@grupo  ${attr}]\n${childrenCode}\t[/@grupo]`;
+            return `${props.Comentario ? `[#--${props.Comentario}--]` : ''}\n
+    [@grupo  ${attr}]\n${childrenCode}\t[/@grupo]`;
         }
     },
     separador: {
@@ -877,11 +925,11 @@ function renderProperties(id) {
         html += `
             <div class="flex flex-col gap-1 mb-3">
                 <label class="text-xs font-bold text-gray-600 uppercase dark:text-gray-400">${label}</label>
-                <input type="text" name="${key}" value="${comp.props[key]}" autocomplete="off" 
+                <input type="text" name="${key}" value="${comp.props[key]}" autocomplete="off"
                     class="border border-gray-300 rounded px-2 py-1.5 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                ${helpText ? `<span class="text-[10px] text-gray-400 dark:text-gray-600">${helpText}</span>` : ''}
+                    ${helpText ? `<span class="text-[10px] text-gray-400 dark:text-gray-600">${helpText}</span>` : ''}
             </div>
-        `;
+            `;
     });
 
     panel.innerHTML = html;
