@@ -70,11 +70,6 @@ const componentConfig = {
 [#if ${props.varQuantidade} ! != '0']
 [#list 1..(${props.varQuantidade}) ? number as i]
 [@grupo]
-    // TODO 
-    **
-    Adicionar uma forma de passar o valor de i do list 
-                freeMarker para o childrenCode
-    **
     ${childrenCode}
 [/@grupo]
 [/#list]
@@ -423,6 +418,21 @@ function addComponent(type, parentId) {
 
     // Clona propriedades padrão
     const props = JSON.parse(JSON.stringify(config.defaultProps));
+
+    // Ajuste inteligente para componentes dentro de Input Dinâmico (loopinput)
+    if (parentId) {
+        const parent = findComponentById(components, parentId);
+        if (parent && parent.type === 'loopinput') {
+            // Adiciona prefixo ${i}º no título para identificar a iteração
+            if (props.titulo) {
+                props.titulo = '${i}º ' + props.titulo;
+            }
+            // Adiciona sufixo ${i} na variável
+            if (props.var) {
+                props.var = props.var + '${i}';
+            }
+        }
+    }
 
     // Garante unicidade da variável
     if (props.var && checkVarExists(props.var, components)) {
