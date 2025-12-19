@@ -2,7 +2,9 @@
 Interface Gráfica de arrasta e solta para criação de modelos FreeMarker para o SigaDoc.
 
 ### Suportes da Versão:
-## Versão 1.0.2 -- 08/12/2025 -- by Thainan Vinicius Katchan
+## Versão 1.0.3 -- 19/12/2025 -- by Thainan Vinicius Katchan
+- Refatoração completa do código JavaScript para facilitar a manutenção, deixando todos osa arquivos de forma modular, assim encontrando bugs e corrigindo de forma mais rápida e eficaz
+
 
 # Editor Visual:
 - Agora é possível arrastar e soltar em qualquer lugar do container
